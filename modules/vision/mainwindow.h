@@ -5,7 +5,7 @@
 #include <QGraphicsView>
 #include <QUndoStack>
 
-#include "basiccommands.hpp"
+#include "tools/basiccommands.h"
 
 // 工具类型枚举
 enum class ToolType {
@@ -13,6 +13,7 @@ enum class ToolType {
     RECTANGLE,
     TRIANGLE,
     ELLIPSE,
+    POLYGON,
     SELECT,
     DELETE,
     COPY,

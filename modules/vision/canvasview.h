@@ -1,17 +1,16 @@
 #ifndef CANVAS_VIEW_H
 #define CANVAS_VIEW_H
 #include <QGraphicsView>
-#include <memory>
 
-#include "mainwindow.h"
+#include "vision/mainwindow.h"
+
+class DrawTool;
 
 class CanvasView : public QGraphicsView {
     Q_OBJECT
 public:
     CanvasView(MainWindow *mw, QWidget *parent = nullptr);
-    void setTool(ToolType tool) {
-        currentTool = tool;
-    }
+    void setTool(ToolType tool);
     void deleteSelectedItems(); // 从场景中移除图形
     void zoomIn();
     void zoomOut();               // 视图缩放
@@ -24,14 +23,13 @@ protected:
     void wheelEvent(QWheelEvent *event) override;
 
 private:
+    void initTools();
+
     MainWindow *window;
     QGraphicsScene *scene;
-    ToolType currentTool = ToolType::SELECT;
+    std::unordered_map<ToolType, DrawTool *> tools;
+    DrawTool *currentTool = nullptr;
 
-    bool drawing = false;
-    QGraphicsItem *previewItem = nullptr;
-    QPointF startPoint;
-
-    QRectF makeNormalizedRect(const QPointF &p1, const QPointF &p2);
+    friend class DrawTool;
 };
 #endif

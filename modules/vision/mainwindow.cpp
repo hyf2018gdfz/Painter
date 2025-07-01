@@ -1,10 +1,10 @@
-#include "mainwindow.h"
+#include "vision/mainwindow.h"
 
 #include <QMenuBar>
 #include <QAction>
 #include <QActionGroup>
 
-#include "canvasview.h"
+#include "vision/canvasview.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), undoStack(new QUndoStack(this)) {
     view = new CanvasView(this);
@@ -35,6 +35,10 @@ void MainWindow::initMenus() {
     QAction *redoAction = editMenu->addAction("重做");
     redoAction->setShortcut(QKeySequence::Redo);
     connect(redoAction, &QAction::triggered, this, &MainWindow::redo);
+    connect(undoStack, &QUndoStack::canUndoChanged, undoAction, &QAction::setEnabled);
+    connect(undoStack, &QUndoStack::canRedoChanged, redoAction, &QAction::setEnabled);
+    undoAction->setEnabled(undoStack->canUndo());
+    redoAction->setEnabled(undoStack->canRedo());
     QAction *deleteAction = editMenu->addAction("删除选中");
     deleteAction->setShortcut(QKeySequence::Delete);
     connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelected);

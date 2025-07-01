@@ -1,5 +1,5 @@
 #include <QApplication>
-#include "mainwindow.h"
+#include "../modules/vision/mainwindow.h"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);

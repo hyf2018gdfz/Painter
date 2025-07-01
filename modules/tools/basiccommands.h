@@ -24,24 +24,29 @@ private:
     QGraphicsItem *m_item;
 };
 
-class DeleteItemCommand : public QUndoCommand {
+class DeleteItemsCommand : public QUndoCommand {
 public:
-    DeleteItemCommand(QGraphicsScene *scene, QGraphicsItem *item, QUndoCommand *parent = nullptr) :
-        QUndoCommand(parent), m_scene(scene), m_item(item) {
+    DeleteItemsCommand(QGraphicsScene *scene, const QList<QGraphicsItem *> &item,
+                       QUndoCommand *parent = nullptr) :
+        QUndoCommand(parent), m_scene(scene), m_items(item) {
         setText("删除图形");
     }
 
     void undo() override {
-        m_scene->addItem(m_item);
+        for (auto item : m_items) {
+            m_scene->addItem(item);
+        }
     }
 
     void redo() override {
-        m_scene->removeItem(m_item);
+        for (auto item : m_items) {
+            m_scene->removeItem(item);
+        }
     }
 
 private:
     QGraphicsScene *m_scene;
-    QGraphicsItem *m_item;
+    QList<QGraphicsItem *> m_items;
 };
 
 // class ModifyItemCommand : public QUndoCommand {
