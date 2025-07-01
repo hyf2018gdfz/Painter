@@ -8,22 +8,7 @@
 #include "tools/basiccommands.h"
 
 // 工具类型枚举
-enum class ToolType {
-    FREEHAND,
-    RECTANGLE,
-    TRIANGLE,
-    ELLIPSE,
-    POLYGON,
-    SELECT,
-    DELETE,
-    COPY,
-    PASTE,
-    UNDO,
-    REDO,
-    NEW,
-    SAVE,
-    OPEN
-};
+enum class ToolType { FREEHAND, RECTANGLE, TRIANGLE, ELLIPSE, POLYGON, LINE, SELECT };
 
 class CanvasView;
 

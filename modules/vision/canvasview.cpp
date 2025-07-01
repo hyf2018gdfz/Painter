@@ -10,7 +10,6 @@ CanvasView::CanvasView(MainWindow *mw, QWidget *parent) : window(mw), QGraphicsV
     scene->setSceneRect(0, 0, 720, 480);
     setScene(scene);
     setRenderHint(QPainter::Antialiasing);
-    setDragMode(QGraphicsView::RubberBandDrag);
 
     QGraphicsRectItem *border = scene->addRect(scene->sceneRect());
     border->setPen(QPen(QColor(255, 0, 0, 63), 2));
@@ -18,16 +17,20 @@ CanvasView::CanvasView(MainWindow *mw, QWidget *parent) : window(mw), QGraphicsV
     border->setZValue(-1);
 
     initTools();
+    setTool(ToolType::SELECT);
 }
 
 void CanvasView::setTool(ToolType tool) {
+    if (currentTool) currentTool->deactivate(this);
     auto it = tools.find(tool);
     currentTool = (it != tools.end()) ? it->second : nullptr;
+    if (currentTool) currentTool->activate(this);
 }
 
 void CanvasView::initTools() {
     tools[ToolType::RECTANGLE] = new RectangleTool();
     tools[ToolType::ELLIPSE] = new EllipseTool();
+    tools[ToolType::SELECT] = new SelectTool();
 }
 
 void CanvasView::deleteSelectedItems() {
@@ -51,6 +54,10 @@ void CanvasView::rotateView(qreal angle) {
 void CanvasView::mousePressEvent(QMouseEvent *event) {
     if (currentTool && event->button() == Qt::LeftButton) {
         currentTool->onMousePress(this, mapToScene(event->pos()));
+        if (currentTool->isBlocked()) {
+            event->accept();
+            return;
+        }
     }
     QGraphicsView::mousePressEvent(event);
 }
@@ -58,13 +65,21 @@ void CanvasView::mousePressEvent(QMouseEvent *event) {
 void CanvasView::mouseMoveEvent(QMouseEvent *event) {
     if (currentTool) {
         currentTool->onMouseMove(this, mapToScene(event->pos()));
+        if (currentTool->isBlocked()) {
+            event->accept();
+            return;
+        }
     }
     QGraphicsView::mouseMoveEvent(event);
 }
 
 void CanvasView::mouseReleaseEvent(QMouseEvent *event) {
-    if (currentTool) {
+    if (currentTool && event->button() == Qt::LeftButton) {
         currentTool->onMouseRelease(this, mapToScene(event->pos()));
+        if (currentTool->isBlocked()) {
+            event->accept();
+            return;
+        }
     }
     QGraphicsView::mouseReleaseEvent(event);
 }

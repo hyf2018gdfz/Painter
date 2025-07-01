@@ -18,3 +18,13 @@ QGraphicsScene *DrawTool::getScene(CanvasView *view) const {
 MainWindow *DrawTool::getWindow(CanvasView *view) const {
     return view->window;
 }
+
+void DrawTool::activate(CanvasView *view) {
+}
+
+void DrawTool::deactivate(CanvasView *view) {
+}
+
+bool DrawTool::isBlocked() const {
+    return false;
+}

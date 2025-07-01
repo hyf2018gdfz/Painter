@@ -2,6 +2,7 @@ set(CORE_SOURCES
     tools/drawtools/rectangletool.cpp
     tools/drawtools/ellipsetool.cpp
     tools/drawtools/commontool.cpp
+    tools/drawtools/selecttool.cpp
     vision/canvasview.cpp
     vision/mainwindow.cpp
 )
