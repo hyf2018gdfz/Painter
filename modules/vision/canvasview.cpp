@@ -27,11 +27,13 @@ void CanvasView::setTool(ToolType tool) {
     if (currentTool) currentTool->activate(this);
 }
 
+// 在此注册工具
 void CanvasView::initTools() {
     tools[ToolType::RECTANGLE] = new RectangleTool();
     tools[ToolType::ELLIPSE] = new EllipseTool();
     tools[ToolType::POLYGON] = new PolygonTool();
     tools[ToolType::SELECT] = new SelectTool();
+    tools[ToolType::LINE] = new LineTool();
 }
 
 void CanvasView::deleteSelectedItems() {

@@ -35,6 +35,21 @@ public:
     void deactivate(CanvasView *view) override;
 };
 
+class LineTool : public DrawTool {
+public:
+    void onMousePress(CanvasView *view, const QPointF &pos) override;
+    void onMouseMove(CanvasView *view, const QPointF &pos) override;
+    void onMouseRelease(CanvasView *view, const QPointF &pos) override;
+    void onMouseDoubleClick(CanvasView *view, const QPointF &pos) override;
+
+    bool isBlocked() const override;
+
+private:
+    QPointF startPos;
+    QGraphicsLineItem *previewItem = nullptr;
+    bool isDrawing = false;
+};
+
 class RectangleTool : public DrawTool {
 public:
     void onMousePress(CanvasView *view, const QPointF &pos) override;

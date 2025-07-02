@@ -4,6 +4,7 @@ set(CORE_SOURCES
     tools/drawtools/commontool.cpp
     tools/drawtools/selecttool.cpp
     tools/drawtools/polygontool.cpp
+    tools/drawtools/linetool.cpp
     vision/canvasview.cpp
     vision/mainwindow.cpp
 )

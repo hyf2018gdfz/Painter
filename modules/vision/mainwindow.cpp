@@ -60,6 +60,8 @@ void MainWindow::initMenus() {
     QMenu *toolMenu = menuBar->addMenu("工具");
     QAction *selectTool = toolMenu->addAction("选择");
     connect(selectTool, &QAction::triggered, [this]() { setCurrentTool(ToolType::SELECT); });
+    QAction *lineTool = toolMenu->addAction("直线");
+    connect(lineTool, &QAction::triggered, [this]() { setCurrentTool(ToolType::LINE); });
     QAction *rectTool = toolMenu->addAction("矩形");
     connect(rectTool, &QAction::triggered, [this]() { setCurrentTool(ToolType::RECTANGLE); });
     QAction *elliTool = toolMenu->addAction("椭圆");
