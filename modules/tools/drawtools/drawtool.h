@@ -9,11 +9,11 @@ class MainWindow;
 
 class DrawTool {
 public:
-    virtual ~DrawTool() {
-    }
+    virtual ~DrawTool() = default;
     virtual void onMousePress(CanvasView *view, const QPointF &scenePos) = 0;
     virtual void onMouseMove(CanvasView *view, const QPointF &scenePos) = 0;
     virtual void onMouseRelease(CanvasView *view, const QPointF &scenePos) = 0;
+    virtual void onMouseDoubleClick(CanvasView *view, const QPointF &scenePos) = 0;
 
     virtual void activate(CanvasView *view);
     virtual void deactivate(CanvasView *view);
@@ -29,6 +29,7 @@ public:
     void onMousePress(CanvasView *view, const QPointF &pos) override;
     void onMouseMove(CanvasView *view, const QPointF &pos) override;
     void onMouseRelease(CanvasView *view, const QPointF &pos) override;
+    void onMouseDoubleClick(CanvasView *view, const QPointF &pos) override;
 
     void activate(CanvasView *view) override;
     void deactivate(CanvasView *view) override;
@@ -39,6 +40,7 @@ public:
     void onMousePress(CanvasView *view, const QPointF &pos) override;
     void onMouseMove(CanvasView *view, const QPointF &pos) override;
     void onMouseRelease(CanvasView *view, const QPointF &pos) override;
+    void onMouseDoubleClick(CanvasView *view, const QPointF &pos) override;
 
     bool isBlocked() const override;
 
@@ -53,6 +55,8 @@ public:
     void onMousePress(CanvasView *view, const QPointF &pos) override;
     void onMouseMove(CanvasView *view, const QPointF &pos) override;
     void onMouseRelease(CanvasView *view, const QPointF &pos) override;
+    void onMouseDoubleClick(CanvasView *view, const QPointF &pos) override;
+
     bool isBlocked() const override;
 
 private:
@@ -61,14 +65,26 @@ private:
     bool isDrawing = false;
 };
 
-// class PolygonTool : public DrawTool {
-// public:
-//     void onMousePress(CanvasView *view, const QPointF &pos) override;
-//     void onMouseMove(CanvasView *view, const QPointF &pos) override;
-//     void onMouseRelease(CanvasView *view, const QPointF &pos) override;
+class PolygonTool : public DrawTool {
+public:
+    void onMousePress(CanvasView *view, const QPointF &pos) override;
+    void onMouseMove(CanvasView *view, const QPointF &pos) override;
+    void onMouseRelease(CanvasView *view, const QPointF &pos) override;
+    void onMouseDoubleClick(CanvasView *view, const QPointF &pos);
+    bool isBlocked() const override;
 
-// private:
-//     QVector<QPointF> m_points;
-//     QGraphicsPolygonItem *m_preview = nullptr;
-// };
+    void activate(CanvasView *view) override;
+    void deactivate(CanvasView *view) override;
+
+private:
+    QVector<QPointF> points;
+    QGraphicsPathItem *previewItem = nullptr;
+    QGraphicsPathItem *previewDashLine = nullptr;
+    QGraphicsEllipseItem *snapIndicator = nullptr;
+    bool isDrawing = false;
+
+    void updateDrawing(CanvasView *view, const QPointF &pos);
+    void cancelDrawing(CanvasView *view);
+    void finishDrawing(CanvasView *view);
+};
 #endif

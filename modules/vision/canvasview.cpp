@@ -30,6 +30,7 @@ void CanvasView::setTool(ToolType tool) {
 void CanvasView::initTools() {
     tools[ToolType::RECTANGLE] = new RectangleTool();
     tools[ToolType::ELLIPSE] = new EllipseTool();
+    tools[ToolType::POLYGON] = new PolygonTool();
     tools[ToolType::SELECT] = new SelectTool();
 }
 
@@ -60,6 +61,17 @@ void CanvasView::mousePressEvent(QMouseEvent *event) {
         }
     }
     QGraphicsView::mousePressEvent(event);
+}
+
+void CanvasView::mouseDoubleClickEvent(QMouseEvent *event) {
+    if (currentTool && event->button() == Qt::LeftButton) {
+        currentTool->onMouseDoubleClick(this, mapToScene(event->pos()));
+        if (currentTool->isBlocked()) {
+            event->accept();
+            return;
+        }
+    }
+    QGraphicsView::mouseDoubleClickEvent(event);
 }
 
 void CanvasView::mouseMoveEvent(QMouseEvent *event) {

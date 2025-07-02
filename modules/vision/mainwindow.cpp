@@ -64,6 +64,8 @@ void MainWindow::initMenus() {
     connect(rectTool, &QAction::triggered, [this]() { setCurrentTool(ToolType::RECTANGLE); });
     QAction *elliTool = toolMenu->addAction("椭圆");
     connect(elliTool, &QAction::triggered, [this]() { setCurrentTool(ToolType::ELLIPSE); });
+    QAction *polyTool = toolMenu->addAction("多边形");
+    connect(polyTool, &QAction::triggered, [this]() { setCurrentTool(ToolType::POLYGON); });
 }
 
 void MainWindow::pushCommand(QUndoCommand *command) {

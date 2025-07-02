@@ -13,6 +13,9 @@ void RectangleTool::onMousePress(CanvasView *view, const QPointF &pos) {
     }
 }
 
+void RectangleTool::onMouseDoubleClick(CanvasView *view, const QPointF &pos) {
+}
+
 void RectangleTool::onMouseMove(CanvasView *view, const QPointF &pos) {
     if (isDrawing && previewItem) {
         auto rect = makeNormalizedRect(startPos, pos);
