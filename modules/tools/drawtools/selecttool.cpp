@@ -8,9 +8,6 @@ void SelectTool::onMousePress(CanvasView *view, const QPointF &pos) {
 void SelectTool::onMouseMove(CanvasView *view, const QPointF &pos) {
 }
 
-void SelectTool::onMouseDoubleClick(CanvasView *view, const QPointF &pos) {
-}
-
 void SelectTool::onMouseRelease(CanvasView *view, const QPointF &pos) {
 }
 

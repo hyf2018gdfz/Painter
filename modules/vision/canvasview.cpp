@@ -34,6 +34,7 @@ void CanvasView::initTools() {
     tools[ToolType::POLYGON] = new PolygonTool();
     tools[ToolType::SELECT] = new SelectTool();
     tools[ToolType::LINE] = new LineTool();
+    tools[ToolType::FREEHAND] = new FreeHandTool();
 }
 
 void CanvasView::deleteSelectedItems() {

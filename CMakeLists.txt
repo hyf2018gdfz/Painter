@@ -14,6 +14,6 @@ qt_standard_project_setup()
 
 add_subdirectory(modules)
 
-add_executable(${PROJECT_NAME} apps/main.cpp)
+add_executable(${PROJECT_NAME} WIN32 apps/main.cpp)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE CoreLib ${QT_LIBS})

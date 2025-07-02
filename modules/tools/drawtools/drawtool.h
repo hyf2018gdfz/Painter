@@ -13,7 +13,7 @@ public:
     virtual void onMousePress(CanvasView *view, const QPointF &scenePos) = 0;
     virtual void onMouseMove(CanvasView *view, const QPointF &scenePos) = 0;
     virtual void onMouseRelease(CanvasView *view, const QPointF &scenePos) = 0;
-    virtual void onMouseDoubleClick(CanvasView *view, const QPointF &scenePos) = 0;
+    virtual void onMouseDoubleClick(CanvasView *view, const QPointF &scenePos);
 
     virtual void activate(CanvasView *view);
     virtual void deactivate(CanvasView *view);
@@ -29,7 +29,6 @@ public:
     void onMousePress(CanvasView *view, const QPointF &pos) override;
     void onMouseMove(CanvasView *view, const QPointF &pos) override;
     void onMouseRelease(CanvasView *view, const QPointF &pos) override;
-    void onMouseDoubleClick(CanvasView *view, const QPointF &pos) override;
 
     void activate(CanvasView *view) override;
     void deactivate(CanvasView *view) override;
@@ -40,7 +39,6 @@ public:
     void onMousePress(CanvasView *view, const QPointF &pos) override;
     void onMouseMove(CanvasView *view, const QPointF &pos) override;
     void onMouseRelease(CanvasView *view, const QPointF &pos) override;
-    void onMouseDoubleClick(CanvasView *view, const QPointF &pos) override;
 
     bool isBlocked() const override;
 
@@ -55,7 +53,6 @@ public:
     void onMousePress(CanvasView *view, const QPointF &pos) override;
     void onMouseMove(CanvasView *view, const QPointF &pos) override;
     void onMouseRelease(CanvasView *view, const QPointF &pos) override;
-    void onMouseDoubleClick(CanvasView *view, const QPointF &pos) override;
 
     bool isBlocked() const override;
 
@@ -70,7 +67,6 @@ public:
     void onMousePress(CanvasView *view, const QPointF &pos) override;
     void onMouseMove(CanvasView *view, const QPointF &pos) override;
     void onMouseRelease(CanvasView *view, const QPointF &pos) override;
-    void onMouseDoubleClick(CanvasView *view, const QPointF &pos) override;
 
     bool isBlocked() const override;
 
@@ -101,5 +97,19 @@ private:
     void updateDrawing(CanvasView *view, const QPointF &pos);
     void cancelDrawing(CanvasView *view);
     void finishDrawing(CanvasView *view);
+};
+
+class FreeHandTool : public DrawTool {
+public:
+    void onMousePress(CanvasView *view, const QPointF &pos) override;
+    void onMouseMove(CanvasView *view, const QPointF &pos) override;
+    void onMouseRelease(CanvasView *view, const QPointF &pos) override;
+
+    bool isBlocked() const override;
+
+private:
+    QGraphicsPathItem *previewItem = nullptr;
+    QPainterPath tempPath;
+    bool isDrawing = false;
 };
 #endif

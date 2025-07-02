@@ -13,9 +13,6 @@ void EllipseTool::onMousePress(CanvasView *view, const QPointF &pos) {
     }
 }
 
-void EllipseTool::onMouseDoubleClick(CanvasView *view, const QPointF &pos) {
-}
-
 void EllipseTool::onMouseMove(CanvasView *view, const QPointF &pos) {
     if (isDrawing && previewItem) {
         auto rect = makeNormalizedRect(startPos, pos);

@@ -93,13 +93,13 @@ void PolygonTool::updateDrawing(CanvasView *view, const QPointF &pos) {
     previewDashLine->setPath(dashPath);
 
     if (points.size() >= 3 && QLineF(pos, points.first()).length() <= 10.0) {
-        if (snapIndicator) {
-            delete snapIndicator;
-        }
         snapIndicator = new QGraphicsEllipseItem(previewItem);
         snapIndicator->setRect(points.first().x() - 5, points.first().y() - 5, 10, 10);
         snapIndicator->setPen(QPen(Qt::red, 1, Qt::DashLine));
         snapIndicator->setZValue(1);
+    } else if (snapIndicator) {
+        delete snapIndicator;
+        snapIndicator = nullptr;
     }
 }
 

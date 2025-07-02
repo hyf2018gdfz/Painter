@@ -13,9 +13,6 @@ void LineTool::onMousePress(CanvasView *view, const QPointF &pos) {
     }
 }
 
-void LineTool::onMouseDoubleClick(CanvasView *view, const QPointF &pos) {
-}
-
 void LineTool::onMouseMove(CanvasView *view, const QPointF &pos) {
     if (isDrawing && previewItem) {
         auto line = QLineF(startPos, pos);

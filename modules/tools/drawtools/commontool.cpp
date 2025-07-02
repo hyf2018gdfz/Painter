@@ -19,6 +19,9 @@ MainWindow *DrawTool::getWindow(CanvasView *view) const {
     return view->window;
 }
 
+void DrawTool::onMouseDoubleClick(CanvasView *view, const QPointF &scenePos) {
+}
+
 void DrawTool::activate(CanvasView *view) {
 }
 
