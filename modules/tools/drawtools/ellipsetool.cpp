@@ -10,17 +10,20 @@ void EllipseTool::onMousePress(CanvasView *view, const QPointF &pos) {
         startPos = pos;
         auto rect = QRectF(startPos, startPos);
         previewItem = getScene(view)->addEllipse(rect, QPen(Qt::blue, 1, Qt::DashLine));
+        previewItem->setTransformOriginPoint(startPos);
+        previewItem->setRotation(-view->getRotateAngle());
     }
 }
 
 void EllipseTool::onMouseMove(CanvasView *view, const QPointF &pos) {
     if (isDrawing && previewItem) {
-        auto rect = makeNormalizedRect(startPos, pos);
+        auto localPos = previewItem->sceneTransform().inverted().map(pos);
+        auto rect = makeNormalizedRect(startPos, localPos);
         // 按 Shift 画圆形
         if (QApplication::keyboardModifiers() & Qt::ShiftModifier) {
             qreal len = qMin(rect.width(), rect.height());
-            if (pos.x() < startPos.x()) rect.setX(startPos.x() - len);
-            if (pos.y() < startPos.y()) rect.setY(startPos.y() - len);
+            if (localPos.x() < startPos.x()) rect.setX(startPos.x() - len);
+            if (localPos.y() < startPos.y()) rect.setY(startPos.y() - len);
             rect.setWidth(len);
             rect.setHeight(len);
         }
@@ -39,6 +42,8 @@ void EllipseTool::onMouseRelease(CanvasView *view, const QPointF &pos) {
         finalItem->setPen(QPen(Qt::black, 2));
         finalItem->setBrush(Qt::transparent);
         finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+        finalItem->setTransformOriginPoint(startPos);
+        finalItem->setRotation(-view->getRotateAngle());
         getWindow(view)->pushCommand(new AddItemCommand(getScene(view), finalItem));
     }
 }

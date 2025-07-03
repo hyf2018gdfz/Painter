@@ -9,6 +9,7 @@ void SelectTool::onMouseMove(CanvasView *view, const QPointF &pos) {
 }
 
 void SelectTool::onMouseRelease(CanvasView *view, const QPointF &pos) {
+    emit getWindow(view)->hasSelectionChanged(!(getScene(view)->selectedItems()).isEmpty());
 }
 
 void SelectTool::activate(CanvasView *view) {

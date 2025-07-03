@@ -22,11 +22,15 @@ public:
     }
     void pushCommand(QUndoCommand *command);
 
+signals:
+    void hasSelectionChanged(bool hasSelection);
+
 public slots:
     void setCurrentTool(ToolType tool); // 切换当前工具
-    void undo();                        // 撤销操作
-    void redo();                        // 重做操作
-    void deleteSelected();              // 删除所有选中图形
+    void savePic();
+    void undo();           // 撤销操作
+    void redo();           // 重做操作
+    void deleteSelected(); // 删除所有选中图形
     void zoomIn();
     void zoomOut();
     void rotateView(qreal angle);

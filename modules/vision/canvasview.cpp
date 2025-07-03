@@ -2,6 +2,7 @@
 
 #include <QMouseEvent>
 #include <QGraphicsItem>
+#include <QPainter>
 
 #include "tools/drawtools/drawtool.h"
 
@@ -11,7 +12,7 @@ CanvasView::CanvasView(MainWindow *mw, QWidget *parent) : window(mw), QGraphicsV
     setScene(scene);
     setRenderHint(QPainter::Antialiasing);
 
-    QGraphicsRectItem *border = scene->addRect(scene->sceneRect());
+    border = scene->addRect(scene->sceneRect());
     border->setPen(QPen(QColor(255, 0, 0, 63), 2));
     border->setBrush(Qt::NoBrush);
     border->setZValue(-1);
@@ -41,6 +42,20 @@ void CanvasView::deleteSelectedItems() {
     auto selectedItems = scene->selectedItems();
     if (selectedItems.isEmpty()) return;
     window->pushCommand(new DeleteItemsCommand(scene, selectedItems));
+    emit window->hasSelectionChanged(false);
+}
+
+void CanvasView::savePic() {
+    scene->removeItem(border);
+    QImage pic(720, 480, QImage::Format_RGB32);
+    QPainter pt(&pic);
+    auto *background = scene->addRect(scene->sceneRect());
+    background->setBrush(QBrush(QColor(255, 255, 255, 255)));
+    background->setZValue(-1);
+    scene->render(&pt);
+    pic.save("try.png", "PNG", 100);
+    scene->removeItem(background);
+    scene->addItem(border);
 }
 
 void CanvasView::zoomIn() {
@@ -53,6 +68,11 @@ void CanvasView::zoomOut() {
 
 void CanvasView::rotateView(qreal angle) {
     rotate(angle);
+    rotateAngle += angle;
+}
+
+qreal CanvasView::getRotateAngle() const {
+    return rotateAngle;
 }
 
 void CanvasView::mousePressEvent(QMouseEvent *event) {

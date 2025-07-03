@@ -3,6 +3,7 @@
 #include <QMenuBar>
 #include <QAction>
 #include <QActionGroup>
+#include <QDebug>
 
 #include "vision/canvasview.h"
 
@@ -24,6 +25,8 @@ void MainWindow::initMenus() {
     QMenu *fileMenu = menuBar->addMenu("文件");
     QAction *openAction = fileMenu->addAction("打开");
     QAction *saveAction = fileMenu->addAction("保存");
+    saveAction->setShortcut(QKeySequence::Save);
+    connect(saveAction, &QAction::triggered, this, &MainWindow::savePic);
     QAction *exitAction = fileMenu->addAction("退出");
 
     QMenu *editMenu = menuBar->addMenu("编辑");
@@ -42,6 +45,8 @@ void MainWindow::initMenus() {
     QAction *deleteAction = editMenu->addAction("删除选中");
     deleteAction->setShortcut(QKeySequence::Delete);
     connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelected);
+    deleteAction->setEnabled(false);
+    connect(this, &MainWindow::hasSelectionChanged, deleteAction, &QAction::setEnabled);
 
     QMenu *viewMenu = menuBar->addMenu("视图");
     QAction *zoomInAction = viewMenu->addAction("放大");
@@ -79,6 +84,10 @@ void MainWindow::pushCommand(QUndoCommand *command) {
 void MainWindow::setCurrentTool(ToolType tool) {
     currentTool = tool;
     view->setTool(currentTool);
+}
+
+void MainWindow::savePic() {
+    view->savePic();
 }
 
 void MainWindow::undo() {

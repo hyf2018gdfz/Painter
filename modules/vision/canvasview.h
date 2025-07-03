@@ -12,9 +12,11 @@ public:
     CanvasView(MainWindow *mw, QWidget *parent = nullptr);
     void setTool(ToolType tool);
     void deleteSelectedItems(); // 从场景中移除图形
+    void savePic();
     void zoomIn();
     void zoomOut();               // 视图缩放
     void rotateView(qreal angle); // 视图旋转
+    qreal getRotateAngle() const;
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -30,6 +32,9 @@ private:
     QGraphicsScene *scene;
     std::unordered_map<ToolType, DrawTool *> tools;
     DrawTool *currentTool = nullptr;
+
+    qreal rotateAngle;
+    QGraphicsRectItem *border;
 
     friend class DrawTool;
 };
