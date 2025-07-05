@@ -1,4 +1,8 @@
-Painter
+# Painter
+
+大作业：一个所见即所得的画图软件。
+
+# Feature
 
 - 支持撤回（Ctrl + Z），前进（Ctrl + Y），删除（Delete）
 - 选择模式，可点击图形或拖动鼠标选择矩形内的图形，可批量选择
@@ -9,12 +13,12 @@ Painter
 - 直线模式，拖动鼠标绘制直线
 - 自由曲线模式，拖动鼠标绘制自由曲线
 
-Experimental feature
+# Experimental Feature
 
-- 保存图片
+- 保存图片，会生成一个 `try.png`
 
-TODO
+# TODO List
 
 - 更丰富的属性选择：颜色、线条样式、粗细甚至力度控制
 - 文件功能
-- 画板设置
+- 画板属性设置

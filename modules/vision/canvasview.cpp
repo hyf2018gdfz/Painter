@@ -4,13 +4,22 @@
 #include <QGraphicsItem>
 #include <QPainter>
 
+#include "vision/mainwindow.h"
+#include "common/common.h"
+#include "tools/itool.h"
 #include "tools/drawtools/drawtool.h"
+#include "tools/edittools/edittool.h"
+#include "tools/viewtools/viewtool.h"
+#include "tools/toolmanager.h"
 
 CanvasView::CanvasView(MainWindow *mw, QWidget *parent) : window(mw), QGraphicsView(parent) {
+    toolManager = new ToolManager(this);
     scene = new QGraphicsScene(this);
     scene->setSceneRect(0, 0, 720, 480);
     setScene(scene);
     setRenderHint(QPainter::Antialiasing);
+
+    curMode = CATEGORY::SELECT_TOOL;
 
     border = scene->addRect(scene->sceneRect());
     border->setPen(QPen(QColor(255, 0, 0, 63), 2));
@@ -22,20 +31,47 @@ CanvasView::CanvasView(MainWindow *mw, QWidget *parent) : window(mw), QGraphicsV
 }
 
 void CanvasView::setTool(ToolType tool) {
-    if (currentTool) currentTool->deactivate(this);
-    auto it = tools.find(tool);
-    currentTool = (it != tools.end()) ? it->second : nullptr;
-    if (currentTool) currentTool->activate(this);
+    if (curTool) curTool->deactivate();
+    curTool = toolManager->getTool(tool);
+    Q_ASSERT(curTool->category() == CATEGORY::SELECT_TOOL
+             || curTool->category() == CATEGORY::EXCLUSIVE_OPERATION);
+    if (curTool) curTool->activate();
 }
 
 // 在此注册工具
 void CanvasView::initTools() {
-    tools[ToolType::RECTANGLE] = new RectangleTool();
-    tools[ToolType::ELLIPSE] = new EllipseTool();
-    tools[ToolType::POLYGON] = new PolygonTool();
-    tools[ToolType::SELECT] = new SelectTool();
-    tools[ToolType::LINE] = new LineTool();
-    tools[ToolType::FREEHAND] = new FreeHandTool();
+    toolManager->registerTool<RectangleTool>(ToolType::RECTANGLE);
+    toolManager->registerTool<EllipseTool>(ToolType::ELLIPSE);
+    toolManager->registerTool<PolygonTool>(ToolType::POLYGON);
+    toolManager->registerTool<LineTool>(ToolType::LINE);
+    toolManager->registerTool<FreeHandTool>(ToolType::FREEHAND);
+    toolManager->registerTool<SelectTool>(ToolType::SELECT);
+    toolManager->registerTool<ZoomTool>(ToolType::ZOOMIN, ZoomTool::MODE::IN);
+    toolManager->registerTool<ZoomTool>(ToolType::ZOOMOUT, ZoomTool::MODE::OUT);
+    toolManager->registerTool<RotateViewTool>(ToolType::ROTATEVIEWCW, 3);
+    toolManager->registerTool<RotateViewTool>(ToolType::ROTATEVIEWCCW, -3);
+}
+
+void CanvasView::executeCommand(ToolType tooltype) {
+    auto *tool = toolManager->getTool(tooltype);
+    Q_ASSERT(tool != nullptr);
+    switch (tool->category()) {
+    case CATEGORY::INDEPENDENT_OPERATION: {
+        tool->activate();
+        break;
+    }
+    case CATEGORY::DEPENDENT_SELECTION: {
+        if (curTool->category() == CATEGORY::SELECT_TOOL) {
+        }
+        break;
+    }
+    case CATEGORY::EXCLUSIVE_OPERATION: {
+        setTool(tooltype);
+        break;
+    }
+
+    default: break;
+    }
 }
 
 void CanvasView::deleteSelectedItems() {
@@ -58,27 +94,27 @@ void CanvasView::savePic() {
     scene->addItem(border);
 }
 
-void CanvasView::zoomIn() {
-    scale(1.2, 1.2);
-}
+// void CanvasView::zoomIn() {
+//     scale(1.2, 1.2);
+// }
 
-void CanvasView::zoomOut() {
-    scale(1 / 1.2, 1 / 1.2);
-}
+// void CanvasView::zoomOut() {
+//     scale(1 / 1.2, 1 / 1.2);
+// }
 
-void CanvasView::rotateView(qreal angle) {
-    rotate(angle);
-    rotateAngle += angle;
-}
+// void CanvasView::rotateView(qreal angle) {
+//     rotate(angle);
+//     rotateAngle += angle;
+// }
 
 qreal CanvasView::getRotateAngle() const {
     return rotateAngle;
 }
 
 void CanvasView::mousePressEvent(QMouseEvent *event) {
-    if (currentTool && event->button() == Qt::LeftButton) {
-        currentTool->onMousePress(this, mapToScene(event->pos()));
-        if (currentTool->isBlocked()) {
+    if (curTool && event->button() == Qt::LeftButton) {
+        curTool->onMousePress(event);
+        if (curTool->isBlocked()) {
             event->accept();
             return;
         }
@@ -87,9 +123,9 @@ void CanvasView::mousePressEvent(QMouseEvent *event) {
 }
 
 void CanvasView::mouseDoubleClickEvent(QMouseEvent *event) {
-    if (currentTool && event->button() == Qt::LeftButton) {
-        currentTool->onMouseDoubleClick(this, mapToScene(event->pos()));
-        if (currentTool->isBlocked()) {
+    if (curTool && event->button() == Qt::LeftButton) {
+        curTool->onMouseDoubleClick(event);
+        if (curTool->isBlocked()) {
             event->accept();
             return;
         }
@@ -98,9 +134,9 @@ void CanvasView::mouseDoubleClickEvent(QMouseEvent *event) {
 }
 
 void CanvasView::mouseMoveEvent(QMouseEvent *event) {
-    if (currentTool) {
-        currentTool->onMouseMove(this, mapToScene(event->pos()));
-        if (currentTool->isBlocked()) {
+    if (curTool) {
+        curTool->onMouseMove(event);
+        if (curTool->isBlocked()) {
             event->accept();
             return;
         }
@@ -109,9 +145,9 @@ void CanvasView::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void CanvasView::mouseReleaseEvent(QMouseEvent *event) {
-    if (currentTool && event->button() == Qt::LeftButton) {
-        currentTool->onMouseRelease(this, mapToScene(event->pos()));
-        if (currentTool->isBlocked()) {
+    if (curTool && event->button() == Qt::LeftButton) {
+        curTool->onMouseRelease(event);
+        if (curTool->isBlocked()) {
             event->accept();
             return;
         }
@@ -122,17 +158,18 @@ void CanvasView::mouseReleaseEvent(QMouseEvent *event) {
 void CanvasView::wheelEvent(QWheelEvent *event) {
     if (event->modifiers() & Qt::ControlModifier) {
         if (event->angleDelta().y() > 0) {
-            zoomIn();
+            executeCommand(ToolType::ZOOMIN);
         } else {
-            zoomOut();
+            executeCommand(ToolType::ZOOMOUT);
         }
         event->accept();
     } else if (event->modifiers() & Qt::ShiftModifier) {
-        const qreal rotationStep = 3.0;
         if (event->angleDelta().y() > 0) {
-            rotateView(rotationStep);
+            rotateAngle -= 3;
+            executeCommand(ToolType::ROTATEVIEWCCW);
         } else {
-            rotateView(-rotationStep);
+            rotateAngle += 3;
+            executeCommand(ToolType::ROTATEVIEWCW);
         }
         event->accept();
     } else {

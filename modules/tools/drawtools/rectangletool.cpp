@@ -3,19 +3,22 @@
 #include <QApplication>
 
 #include "vision/canvasview.h"
+#include "vision/mainwindow.h"
 
-void RectangleTool::onMousePress(CanvasView *view, const QPointF &pos) {
+void RectangleTool::onMousePress(QMouseEvent *event) {
+    auto pos = view()->mapToScene(event->pos());
     if (!isDrawing) {
         isDrawing = true;
         startPos = pos;
         auto rect = QRectF(startPos, startPos);
-        previewItem = getScene(view)->addRect(rect, QPen(Qt::blue, 1, Qt::DashLine));
+        previewItem = scene()->addRect(rect, QPen(Qt::blue, 1, Qt::DashLine));
         previewItem->setTransformOriginPoint(startPos);
-        previewItem->setRotation(-view->getRotateAngle());
+        previewItem->setRotation(-view()->getRotateAngle());
     }
 }
 
-void RectangleTool::onMouseMove(CanvasView *view, const QPointF &pos) {
+void RectangleTool::onMouseMove(QMouseEvent *event) {
+    auto pos = view()->mapToScene(event->pos());
     if (isDrawing && previewItem) {
         auto localPos = previewItem->sceneTransform().inverted().map(pos);
         auto rect = makeNormalizedRect(startPos, localPos);
@@ -31,10 +34,10 @@ void RectangleTool::onMouseMove(CanvasView *view, const QPointF &pos) {
     }
 }
 
-void RectangleTool::onMouseRelease(CanvasView *view, const QPointF &pos) {
+void RectangleTool::onMouseRelease(QMouseEvent *event) {
     if (isDrawing && previewItem) {
         QRectF finalRect = previewItem->rect();
-        getScene(view)->removeItem(previewItem);
+        scene()->removeItem(previewItem);
         delete previewItem;
         previewItem = nullptr;
         isDrawing = false;
@@ -43,11 +46,7 @@ void RectangleTool::onMouseRelease(CanvasView *view, const QPointF &pos) {
         finalItem->setBrush(Qt::transparent);
         finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
         finalItem->setTransformOriginPoint(startPos);
-        finalItem->setRotation(-view->getRotateAngle());
-        getWindow(view)->pushCommand(new AddItemCommand(getScene(view), finalItem));
+        finalItem->setRotation(-view()->getRotateAngle());
+        window()->pushCommand(new AddItemCommand(scene(), finalItem));
     }
-}
-
-bool RectangleTool::isBlocked() const {
-    return isDrawing;
 }

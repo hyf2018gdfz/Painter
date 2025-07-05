@@ -6,9 +6,7 @@
 #include <QUndoStack>
 
 #include "tools/basiccommands.h"
-
-// 工具类型枚举
-enum class ToolType { FREEHAND, RECTANGLE, TRIANGLE, ELLIPSE, POLYGON, LINE, SELECT };
+#include "common/common.h"
 
 class CanvasView;
 
@@ -17,9 +15,7 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ToolType getCurrentTool() const {
-        return currentTool;
-    }
+    ToolType getCurrentTool() const { return currentTool; }
     void pushCommand(QUndoCommand *command);
 
 signals:
@@ -31,9 +27,9 @@ public slots:
     void undo();           // 撤销操作
     void redo();           // 重做操作
     void deleteSelected(); // 删除所有选中图形
-    void zoomIn();
-    void zoomOut();
-    void rotateView(qreal angle);
+    // void zoomIn();
+    // void zoomOut();
+    // void rotateView(qreal angle);
     // ... 菜单和工具栏相关函数
 private:
     void initMenus();

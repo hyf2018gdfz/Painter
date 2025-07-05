@@ -1,115 +1,102 @@
 #ifndef DRAW_TOOL_H
 #define DRAW_TOOL_H
+
 #include <QGraphicsItem>
+#include "tools/itool.h"
 
-QRectF makeNormalizedRect(const QPointF &p1, const QPointF &p2);
-
-class CanvasView;
-class MainWindow;
-
-class DrawTool {
+class DrawTool : public ITool {
 public:
+    explicit DrawTool(CanvasView *view) : ITool(view) {}
     virtual ~DrawTool() = default;
-    virtual void onMousePress(CanvasView *view, const QPointF &scenePos) = 0;
-    virtual void onMouseMove(CanvasView *view, const QPointF &scenePos) = 0;
-    virtual void onMouseRelease(CanvasView *view, const QPointF &scenePos) = 0;
-    virtual void onMouseDoubleClick(CanvasView *view, const QPointF &scenePos);
 
-    virtual void activate(CanvasView *view);
-    virtual void deactivate(CanvasView *view);
-    virtual bool isBlocked() const;
+    virtual CATEGORY category() const override { return CATEGORY::EXCLUSIVE_OPERATION; }
+
+    virtual void onKeyPress(QKeyEvent *) override {}
+    virtual void onKeyRelease(QKeyEvent *) override {}
+
+    virtual void onWheel(QWheelEvent *) override {}
+
+    virtual void activate() override {}
+    virtual void deactivate() override {}
+
+    bool isBlocked() const override { return isDrawing; };
 
 protected:
-    QGraphicsScene *getScene(CanvasView *view) const;
-    MainWindow *getWindow(CanvasView *view) const;
-};
-
-class SelectTool : public DrawTool {
-public:
-    void onMousePress(CanvasView *view, const QPointF &pos) override;
-    void onMouseMove(CanvasView *view, const QPointF &pos) override;
-    void onMouseRelease(CanvasView *view, const QPointF &pos) override;
-
-    void activate(CanvasView *view) override;
-    void deactivate(CanvasView *view) override;
+    bool isDrawing = false;
 };
 
 class LineTool : public DrawTool {
 public:
-    void onMousePress(CanvasView *view, const QPointF &pos) override;
-    void onMouseMove(CanvasView *view, const QPointF &pos) override;
-    void onMouseRelease(CanvasView *view, const QPointF &pos) override;
+    explicit LineTool(CanvasView *view) : DrawTool(view) {}
 
-    bool isBlocked() const override;
+    void onMousePress(QMouseEvent *event) override;
+    void onMouseMove(QMouseEvent *event) override;
+    void onMouseRelease(QMouseEvent *event) override;
 
 private:
     QPointF startPos;
     QGraphicsLineItem *previewItem = nullptr;
-    bool isDrawing = false;
 };
 
 class RectangleTool : public DrawTool {
 public:
-    void onMousePress(CanvasView *view, const QPointF &pos) override;
-    void onMouseMove(CanvasView *view, const QPointF &pos) override;
-    void onMouseRelease(CanvasView *view, const QPointF &pos) override;
+    explicit RectangleTool(CanvasView *view) : DrawTool(view) {}
 
-    bool isBlocked() const override;
+    void onMousePress(QMouseEvent *event) override;
+    void onMouseMove(QMouseEvent *event) override;
+    void onMouseRelease(QMouseEvent *event) override;
 
 private:
     QPointF startPos;
     QGraphicsRectItem *previewItem = nullptr;
-    bool isDrawing = false;
 };
 
 class EllipseTool : public DrawTool {
 public:
-    void onMousePress(CanvasView *view, const QPointF &pos) override;
-    void onMouseMove(CanvasView *view, const QPointF &pos) override;
-    void onMouseRelease(CanvasView *view, const QPointF &pos) override;
+    explicit EllipseTool(CanvasView *view) : DrawTool(view) {}
 
-    bool isBlocked() const override;
+    void onMousePress(QMouseEvent *event) override;
+    void onMouseMove(QMouseEvent *event) override;
+    void onMouseRelease(QMouseEvent *event) override;
 
 private:
     QPointF startPos;
     QGraphicsEllipseItem *previewItem = nullptr;
-    bool isDrawing = false;
 };
 
 class PolygonTool : public DrawTool {
 public:
-    void onMousePress(CanvasView *view, const QPointF &pos) override;
-    void onMouseMove(CanvasView *view, const QPointF &pos) override;
-    void onMouseRelease(CanvasView *view, const QPointF &pos) override;
-    void onMouseDoubleClick(CanvasView *view, const QPointF &pos);
-    bool isBlocked() const override;
+    explicit PolygonTool(CanvasView *view) : DrawTool(view) {}
 
-    void activate(CanvasView *view) override;
-    void deactivate(CanvasView *view) override;
+    void onMousePress(QMouseEvent *event) override;
+    void onMouseMove(QMouseEvent *event) override;
+    void onMouseRelease(QMouseEvent *event) override;
+    void onMouseDoubleClick(QMouseEvent *event) override;
+
+    void activate() override;
+    void deactivate() override;
 
 private:
     QVector<QPointF> points;
     QGraphicsPathItem *previewItem = nullptr;
     QGraphicsPathItem *previewDashLine = nullptr;
     QGraphicsEllipseItem *snapIndicator = nullptr;
-    bool isDrawing = false;
 
-    void updateDrawing(CanvasView *view, const QPointF &pos);
-    void cancelDrawing(CanvasView *view);
-    void finishDrawing(CanvasView *view);
+    void updateDrawing(const QPointF &pos);
+    void cancelDrawing();
+    void finishDrawing();
 };
 
 class FreeHandTool : public DrawTool {
 public:
-    void onMousePress(CanvasView *view, const QPointF &pos) override;
-    void onMouseMove(CanvasView *view, const QPointF &pos) override;
-    void onMouseRelease(CanvasView *view, const QPointF &pos) override;
+    explicit FreeHandTool(CanvasView *view) : DrawTool(view) {}
 
-    bool isBlocked() const override;
+    void onMousePress(QMouseEvent *event) override;
+    void onMouseMove(QMouseEvent *event) override;
+    void onMouseRelease(QMouseEvent *event) override;
 
 private:
     QGraphicsPathItem *previewItem = nullptr;
     QPainterPath tempPath;
-    bool isDrawing = false;
 };
 #endif

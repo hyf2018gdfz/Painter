@@ -3,38 +3,37 @@
 #include <QApplication>
 
 #include "vision/canvasview.h"
+#include "vision/mainwindow.h"
 
-void FreeHandTool::onMousePress(CanvasView *view, const QPointF &pos) {
+void FreeHandTool::onMousePress(QMouseEvent *event) {
+    auto pos = view()->mapToScene(event->pos());
     if (!isDrawing) {
         isDrawing = true;
         tempPath = QPainterPath();
         tempPath.moveTo(pos);
         previewItem = new QGraphicsPathItem();
         previewItem->setPen(QPen(Qt::black, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        getScene(view)->addItem(previewItem);
+        scene()->addItem(previewItem);
     }
 }
 
-void FreeHandTool::onMouseMove(CanvasView *view, const QPointF &pos) {
+void FreeHandTool::onMouseMove(QMouseEvent *event) {
+    auto pos = view()->mapToScene(event->pos());
     if (isDrawing && previewItem) {
         tempPath.lineTo(pos);
         previewItem->setPath(tempPath);
     }
 }
 
-void FreeHandTool::onMouseRelease(CanvasView *view, const QPointF &pos) {
+void FreeHandTool::onMouseRelease(QMouseEvent *event) {
     if (isDrawing && previewItem) {
         auto finalItem = new QGraphicsPathItem(tempPath);
         finalItem->setPen(QPen(Qt::black, 2));
         finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
-        getWindow(view)->pushCommand(new AddItemCommand(getScene(view), finalItem));
-        getScene(view)->removeItem(previewItem);
+        window()->pushCommand(new AddItemCommand(scene(), finalItem));
+        scene()->removeItem(previewItem);
         delete previewItem;
         previewItem = nullptr;
         isDrawing = false;
     }
-}
-
-bool FreeHandTool::isBlocked() const {
-    return isDrawing;
 }

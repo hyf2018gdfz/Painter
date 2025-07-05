@@ -3,8 +3,10 @@
 #include <QApplication>
 
 #include "vision/canvasview.h"
+#include "vision/mainwindow.h"
 
-void PolygonTool::onMousePress(CanvasView *view, const QPointF &pos) {
+void PolygonTool::onMousePress(QMouseEvent *event) {
+    auto pos = view()->mapToScene(event->pos());
     if (!isDrawing) {
         isDrawing = true;
         points.clear();
@@ -13,50 +15,51 @@ void PolygonTool::onMousePress(CanvasView *view, const QPointF &pos) {
         previewItem->setPen(QPen(Qt::blue, 1, Qt::SolidLine));
         previewDashLine = new QGraphicsPathItem(previewItem);
         snapIndicator = new QGraphicsEllipseItem(previewItem);
-        getScene(view)->addItem(previewItem);
-        updateDrawing(view, pos);
+        scene()->addItem(previewItem);
+        updateDrawing(pos);
     } else {
         points.push_back(pos);
-        updateDrawing(view, pos);
+        updateDrawing(pos);
 
         if (points.size() >= 3 && QLineF(pos, points.first()).length() <= 10.0) {
-            finishDrawing(view);
-            cancelDrawing(view);
+            finishDrawing();
+            cancelDrawing();
         }
     }
 }
 
-void PolygonTool::onMouseMove(CanvasView *view, const QPointF &pos) {
+void PolygonTool::onMouseMove(QMouseEvent *event) {
+    auto pos = view()->mapToScene(event->pos());
     if (isDrawing) {
-        updateDrawing(view, pos);
+        updateDrawing(pos);
     }
 }
 
-void PolygonTool::onMouseRelease(CanvasView *view, const QPointF &pos) {
+void PolygonTool::onMouseRelease(QMouseEvent *event) {
 }
 
-void PolygonTool::onMouseDoubleClick(CanvasView *view, const QPointF &pos) {
+void PolygonTool::onMouseDoubleClick(QMouseEvent *event) {
     if (isDrawing) {
         if (points.size() >= 3) {
-            finishDrawing(view);
+            finishDrawing();
         }
-        cancelDrawing(view);
+        cancelDrawing();
     }
 }
 
-void PolygonTool::finishDrawing(CanvasView *view) {
+void PolygonTool::finishDrawing() {
     QPolygonF finalPolygon(points);
     finalPolygon.push_back(points.first());
     auto finalItem = new QGraphicsPolygonItem(finalPolygon);
     finalItem->setPen(QPen(Qt::black, 2));
     finalItem->setBrush(Qt::transparent);
     finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
-    getWindow(view)->pushCommand(new AddItemCommand(getScene(view), finalItem));
+    window()->pushCommand(new AddItemCommand(scene(), finalItem));
 }
 
-void PolygonTool::cancelDrawing(CanvasView *view) {
+void PolygonTool::cancelDrawing() {
     if (previewItem) {
-        getScene(view)->removeItem(previewItem);
+        scene()->removeItem(previewItem);
         delete previewItem;
         previewItem = nullptr;
         previewDashLine = nullptr;
@@ -66,7 +69,7 @@ void PolygonTool::cancelDrawing(CanvasView *view) {
     isDrawing = false;
 }
 
-void PolygonTool::updateDrawing(CanvasView *view, const QPointF &pos) {
+void PolygonTool::updateDrawing(const QPointF &pos) {
     if (!isDrawing || points.isEmpty()) return;
     QPainterPath path;
     if (points.size() >= 2) {
@@ -103,14 +106,10 @@ void PolygonTool::updateDrawing(CanvasView *view, const QPointF &pos) {
     }
 }
 
-bool PolygonTool::isBlocked() const {
-    return isDrawing;
+void PolygonTool::activate() {
+    view()->setMouseTracking(true);
 }
 
-void PolygonTool::activate(CanvasView *view) {
-    view->setMouseTracking(true);
-}
-
-void PolygonTool::deactivate(CanvasView *view) {
-    view->setMouseTracking(false);
+void PolygonTool::deactivate() {
+    view()->setMouseTracking(false);
 }

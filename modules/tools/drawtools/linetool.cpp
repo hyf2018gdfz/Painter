@@ -3,17 +3,20 @@
 #include <QApplication>
 
 #include "vision/canvasview.h"
+#include "vision/mainwindow.h"
 
-void LineTool::onMousePress(CanvasView *view, const QPointF &pos) {
+void LineTool::onMousePress(QMouseEvent *event) {
+    auto pos = view()->mapToScene(event->pos());
     if (!isDrawing) {
         isDrawing = true;
         startPos = pos;
         auto line = QLineF(startPos, startPos);
-        previewItem = getScene(view)->addLine(line, QPen(Qt::blue, 1, Qt::DashLine));
+        previewItem = scene()->addLine(line, QPen(Qt::blue, 1, Qt::DashLine));
     }
 }
 
-void LineTool::onMouseMove(CanvasView *view, const QPointF &pos) {
+void LineTool::onMouseMove(QMouseEvent *event) {
+    auto pos = view()->mapToScene(event->pos());
     if (isDrawing && previewItem) {
         auto line = QLineF(startPos, pos);
         // TODO: 按 Shift 画八个方向的直线
@@ -21,20 +24,16 @@ void LineTool::onMouseMove(CanvasView *view, const QPointF &pos) {
     }
 }
 
-void LineTool::onMouseRelease(CanvasView *view, const QPointF &pos) {
+void LineTool::onMouseRelease(QMouseEvent *event) {
     if (isDrawing && previewItem) {
         QLineF finalLine = previewItem->line();
-        getScene(view)->removeItem(previewItem);
+        scene()->removeItem(previewItem);
         delete previewItem;
         previewItem = nullptr;
         isDrawing = false;
         auto finalItem = new QGraphicsLineItem(finalLine);
         finalItem->setPen(QPen(Qt::black, 2));
         finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
-        getWindow(view)->pushCommand(new AddItemCommand(getScene(view), finalItem));
+        window()->pushCommand(new AddItemCommand(scene(), finalItem));
     }
-}
-
-bool LineTool::isBlocked() const {
-    return isDrawing;
 }

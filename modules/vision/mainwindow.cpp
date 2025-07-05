@@ -51,16 +51,20 @@ void MainWindow::initMenus() {
     QMenu *viewMenu = menuBar->addMenu("视图");
     QAction *zoomInAction = viewMenu->addAction("放大");
     zoomInAction->setShortcut(QKeySequence("Ctrl++"));
-    connect(zoomInAction, &QAction::triggered, this, &MainWindow::zoomIn);
+    connect(zoomInAction, &QAction::triggered,
+            [this]() { view->executeCommand(ToolType::ZOOMIN); });
     QAction *zoomOutAction = viewMenu->addAction("缩小");
     zoomOutAction->setShortcut(QKeySequence("Ctrl+-"));
-    connect(zoomOutAction, &QAction::triggered, this, &MainWindow::zoomOut);
-    QAction *rotateCWAction = viewMenu->addAction("顺时针旋转");
-    rotateCWAction->setShortcut(QKeySequence("Shift++"));
-    connect(rotateCWAction, &QAction::triggered, [this]() { rotateView(3); });
+    connect(zoomOutAction, &QAction::triggered,
+            [this]() { view->executeCommand(ToolType::ZOOMOUT); });
     QAction *rotateCCWAction = viewMenu->addAction("逆时针旋转");
-    rotateCCWAction->setShortcut(QKeySequence("Shift+-"));
-    connect(rotateCCWAction, &QAction::triggered, [this]() { rotateView(-3); });
+    rotateCCWAction->setShortcut(QKeySequence("Shift++"));
+    connect(rotateCCWAction, &QAction::triggered,
+            [this]() { view->executeCommand(ToolType::ROTATEVIEWCCW); });
+    QAction *rotateCWAction = viewMenu->addAction("顺时针旋转");
+    rotateCWAction->setShortcut(QKeySequence("Shift+-"));
+    connect(rotateCWAction, &QAction::triggered,
+            [this]() { view->executeCommand(ToolType::ROTATEVIEWCW); });
 
     QMenu *toolMenu = menuBar->addMenu("工具");
     QAction *selectTool = toolMenu->addAction("选择");
@@ -102,14 +106,14 @@ void MainWindow::deleteSelected() {
     view->deleteSelectedItems();
 }
 
-void MainWindow::zoomIn() {
-    view->zoomIn();
-}
+// void MainWindow::zoomIn() {
+//     view->zoomIn();
+// }
 
-void MainWindow::zoomOut() {
-    view->zoomOut();
-}
+// void MainWindow::zoomOut() {
+//     view->zoomOut();
+// }
 
-void MainWindow::rotateView(qreal angle) {
-    view->rotateView(angle);
-}
+// void MainWindow::rotateView(qreal angle) {
+//     view->rotateView(angle);
+// }
