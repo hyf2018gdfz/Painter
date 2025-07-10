@@ -1,17 +1,8 @@
-set(CORE_SOURCES
-    tools/drawtools/rectangletool.cpp
-    tools/drawtools/ellipsetool.cpp
-    tools/drawtools/polygontool.cpp
-    tools/drawtools/linetool.cpp
-    tools/drawtools/freehandtool.cpp
-    tools/edittools/selecttool.cpp
-    tools/viewtools/zoomtool.cpp
-    tools/viewtools/rotateviewtool.cpp
-    vision/canvasview.cpp
-    vision/mainwindow.cpp
-    common/common.cpp
-    tools/toolmanager.cpp
-    tools/itool.cpp
+file(GLOB_RECURSE CORE_SOURCES 
+    "${CMAKE_CURRENT_SOURCE_DIR}/commands/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/tools/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/vision/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/common/*.cpp"
 )
 
 add_library(CoreLib STATIC
@@ -20,6 +11,7 @@ add_library(CoreLib STATIC
 
 target_include_directories(CoreLib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/commands
     ${CMAKE_CURRENT_SOURCE_DIR}/common
     ${CMAKE_CURRENT_SOURCE_DIR}/tools
     ${CMAKE_CURRENT_SOURCE_DIR}/vision

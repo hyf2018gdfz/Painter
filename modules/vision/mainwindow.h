@@ -5,7 +5,7 @@
 #include <QGraphicsView>
 #include <QUndoStack>
 
-#include "tools/basiccommands.h"
+#include "commands/icommand.h"
 #include "common/common.h"
 
 class CanvasView;

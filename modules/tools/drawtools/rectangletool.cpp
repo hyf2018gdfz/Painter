@@ -47,6 +47,6 @@ void RectangleTool::onMouseRelease(QMouseEvent *event) {
         finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
         finalItem->setTransformOriginPoint(startPos);
         finalItem->setRotation(-view()->getRotateAngle());
-        window()->pushCommand(new AddItemCommand(scene(), finalItem));
+        window()->pushCommand(new AddItemsCommand(scene(), nullptr, finalItem));
     }
 }

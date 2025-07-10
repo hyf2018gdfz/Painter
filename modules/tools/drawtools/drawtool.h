@@ -82,6 +82,8 @@ private:
     QGraphicsPathItem *previewDashLine = nullptr;
     QGraphicsEllipseItem *snapIndicator = nullptr;
 
+    bool isUpdating = false;
+
     void updateDrawing(const QPointF &pos);
     void cancelDrawing();
     void finishDrawing();

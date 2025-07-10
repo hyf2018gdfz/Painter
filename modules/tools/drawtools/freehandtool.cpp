@@ -30,7 +30,7 @@ void FreeHandTool::onMouseRelease(QMouseEvent *event) {
         auto finalItem = new QGraphicsPathItem(tempPath);
         finalItem->setPen(QPen(Qt::black, 2));
         finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
-        window()->pushCommand(new AddItemCommand(scene(), finalItem));
+        window()->pushCommand(new AddItemsCommand(scene(), nullptr, finalItem));
         scene()->removeItem(previewItem);
         delete previewItem;
         previewItem = nullptr;

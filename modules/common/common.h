@@ -15,7 +15,9 @@ enum class ToolType {
     ZOOMIN,
     ZOOMOUT,
     ROTATEVIEWCW,
-    ROTATEVIEWCCW
+    ROTATEVIEWCCW,
+    COMBINE_SELECTED,
+    DELETE_SELECTED,
 };
 
 enum class CATEGORY {

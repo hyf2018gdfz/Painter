@@ -7,8 +7,8 @@
 
 void PolygonTool::onMousePress(QMouseEvent *event) {
     auto pos = view()->mapToScene(event->pos());
-    if (!isDrawing) {
-        isDrawing = true;
+    if (!isUpdating) {
+        isUpdating = true;
         points.clear();
         points.push_back(pos);
         previewItem = new QGraphicsPathItem();
@@ -30,7 +30,7 @@ void PolygonTool::onMousePress(QMouseEvent *event) {
 
 void PolygonTool::onMouseMove(QMouseEvent *event) {
     auto pos = view()->mapToScene(event->pos());
-    if (isDrawing) {
+    if (isUpdating) {
         updateDrawing(pos);
     }
 }
@@ -39,7 +39,7 @@ void PolygonTool::onMouseRelease(QMouseEvent *event) {
 }
 
 void PolygonTool::onMouseDoubleClick(QMouseEvent *event) {
-    if (isDrawing) {
+    if (isUpdating) {
         if (points.size() >= 3) {
             finishDrawing();
         }
@@ -54,7 +54,7 @@ void PolygonTool::finishDrawing() {
     finalItem->setPen(QPen(Qt::black, 2));
     finalItem->setBrush(Qt::transparent);
     finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
-    window()->pushCommand(new AddItemCommand(scene(), finalItem));
+    window()->pushCommand(new AddItemsCommand(scene(), nullptr, finalItem));
 }
 
 void PolygonTool::cancelDrawing() {
@@ -66,11 +66,11 @@ void PolygonTool::cancelDrawing() {
         snapIndicator = nullptr;
     }
     points.clear();
-    isDrawing = false;
+    isUpdating = false;
 }
 
 void PolygonTool::updateDrawing(const QPointF &pos) {
-    if (!isDrawing || points.isEmpty()) return;
+    if (!isUpdating || points.isEmpty()) return;
     QPainterPath path;
     if (points.size() >= 2) {
         path.moveTo(points.first());
@@ -107,9 +107,11 @@ void PolygonTool::updateDrawing(const QPointF &pos) {
 }
 
 void PolygonTool::activate() {
+    isDrawing = true;
     view()->setMouseTracking(true);
 }
 
 void PolygonTool::deactivate() {
     view()->setMouseTracking(false);
+    isDrawing = false;
 }

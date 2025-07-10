@@ -19,8 +19,6 @@ CanvasView::CanvasView(MainWindow *mw, QWidget *parent) : window(mw), QGraphicsV
     setScene(scene);
     setRenderHint(QPainter::Antialiasing);
 
-    curMode = CATEGORY::SELECT_TOOL;
-
     border = scene->addRect(scene->sceneRect());
     border->setPen(QPen(QColor(255, 0, 0, 63), 2));
     border->setBrush(Qt::NoBrush);
@@ -28,6 +26,8 @@ CanvasView::CanvasView(MainWindow *mw, QWidget *parent) : window(mw), QGraphicsV
 
     initTools();
     setTool(ToolType::SELECT);
+
+    connect(scene, &QGraphicsScene::selectionChanged, this, &CanvasView::updateSelectionState);
 }
 
 void CanvasView::setTool(ToolType tool) {
@@ -50,11 +50,19 @@ void CanvasView::initTools() {
     toolManager->registerTool<ZoomTool>(ToolType::ZOOMOUT, ZoomTool::MODE::OUT);
     toolManager->registerTool<RotateViewTool>(ToolType::ROTATEVIEWCW, 3);
     toolManager->registerTool<RotateViewTool>(ToolType::ROTATEVIEWCCW, -3);
+    toolManager->registerTool<DeleteTool>(ToolType::DELETE_SELECTED);
+    toolManager->registerTool<CombineTool>(ToolType::COMBINE_SELECTED);
+}
+
+void CanvasView::updateSelectionState() {
+    int count = scene->selectedItems().size();
+    emit selectionCountChanged(count);
 }
 
 void CanvasView::executeCommand(ToolType tooltype) {
     auto *tool = toolManager->getTool(tooltype);
     Q_ASSERT(tool != nullptr);
+    // qDebug() << "now: " << (int)curTool->category() << " switch " << (int)tool->category();
     switch (tool->category()) {
     case CATEGORY::INDEPENDENT_OPERATION: {
         tool->activate();
@@ -62,6 +70,7 @@ void CanvasView::executeCommand(ToolType tooltype) {
     }
     case CATEGORY::DEPENDENT_SELECTION: {
         if (curTool->category() == CATEGORY::SELECT_TOOL) {
+            tool->activate();
         }
         break;
     }
@@ -69,7 +78,10 @@ void CanvasView::executeCommand(ToolType tooltype) {
         setTool(tooltype);
         break;
     }
-
+    case CATEGORY::SELECT_TOOL: {
+        setTool(tooltype);
+        break;
+    }
     default: break;
     }
 }

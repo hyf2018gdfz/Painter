@@ -25,6 +25,9 @@ public:
 
     void executeCommand(ToolType tool);
 
+signals:
+    void selectionCountChanged(int count);
+
 protected:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -38,12 +41,12 @@ protected:
 
 private:
     void initTools();
+    void updateSelectionState();
 
     MainWindow *window;
     QGraphicsScene *scene;
     ToolManager *toolManager;
 
-    CATEGORY curMode;
     ITool *curTool = nullptr; // 此处的tool应该是选择或者某种画图
 
     qreal rotateAngle;

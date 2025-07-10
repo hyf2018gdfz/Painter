@@ -41,12 +41,12 @@ void EllipseTool::onMouseRelease(QMouseEvent *event) {
         delete previewItem;
         previewItem = nullptr;
         isDrawing = false;
-        auto finalItem = new QGraphicsEllipseItem(finalElli);
+        auto *finalItem = new QGraphicsEllipseItem(finalElli);
         finalItem->setPen(QPen(Qt::black, 2));
         finalItem->setBrush(Qt::transparent);
         finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
         finalItem->setTransformOriginPoint(startPos);
         finalItem->setRotation(-view()->getRotateAngle());
-        window()->pushCommand(new AddItemCommand(scene(), finalItem));
+        window()->pushCommand(new AddItemsCommand(scene(), nullptr, finalItem));
     }
 }

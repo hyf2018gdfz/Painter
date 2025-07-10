@@ -44,9 +44,18 @@ void MainWindow::initMenus() {
     redoAction->setEnabled(undoStack->canRedo());
     QAction *deleteAction = editMenu->addAction("删除选中");
     deleteAction->setShortcut(QKeySequence::Delete);
-    connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelected);
+    connect(deleteAction, &QAction::triggered,
+            [this]() { view->executeCommand(ToolType::DELETE_SELECTED); });
     deleteAction->setEnabled(false);
-    connect(this, &MainWindow::hasSelectionChanged, deleteAction, &QAction::setEnabled);
+    connect(view, &CanvasView::selectionCountChanged,
+            [deleteAction](int count) { deleteAction->setEnabled(count >= 1); });
+    QAction *combineAction = editMenu->addAction("组合");
+    combineAction->setShortcut(QKeySequence("Ctrl+G"));
+    connect(combineAction, &QAction::triggered,
+            [this]() { view->executeCommand(ToolType::COMBINE_SELECTED); });
+    combineAction->setEnabled(false);
+    connect(view, &CanvasView::selectionCountChanged,
+            [combineAction](int count) { combineAction->setEnabled(count >= 2); });
 
     QMenu *viewMenu = menuBar->addMenu("视图");
     QAction *zoomInAction = viewMenu->addAction("放大");
@@ -87,7 +96,7 @@ void MainWindow::pushCommand(QUndoCommand *command) {
 
 void MainWindow::setCurrentTool(ToolType tool) {
     currentTool = tool;
-    view->setTool(currentTool);
+    view->executeCommand(currentTool);
 }
 
 void MainWindow::savePic() {
