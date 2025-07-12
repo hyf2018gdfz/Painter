@@ -33,9 +33,14 @@ public slots:
     // ... 菜单和工具栏相关函数
 private:
     void initMenus();
+    void initLeftBar();
 
     CanvasView *view;
     QUndoStack *undoStack;
     ToolType currentTool = ToolType::SELECT;
+
+    QDockWidget *dockWidget;
+
+    QWidget *leftBar;
 };
 #endif

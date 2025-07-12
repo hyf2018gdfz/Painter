@@ -18,6 +18,7 @@ CanvasView::CanvasView(MainWindow *mw, QWidget *parent) : window(mw), QGraphicsV
     scene->setSceneRect(0, 0, 720, 480);
     setScene(scene);
     setRenderHint(QPainter::Antialiasing);
+    setMouseTracking(true);
 
     border = scene->addRect(scene->sceneRect());
     border->setPen(QPen(QColor(255, 0, 0, 63), 2));

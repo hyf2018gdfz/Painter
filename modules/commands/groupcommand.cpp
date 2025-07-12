@@ -1,5 +1,7 @@
 #include "commands/groupcommand.h"
 
+/// BUG: 组合图形再撤销后，图形的zvalue会改变
+
 void GroupCommand::undo() {
     m_scene->removeItem(m_group);
     for (auto *item : m_items) {

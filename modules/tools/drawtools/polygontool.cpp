@@ -108,10 +108,8 @@ void PolygonTool::updateDrawing(const QPointF &pos) {
 
 void PolygonTool::activate() {
     isDrawing = true;
-    view()->setMouseTracking(true);
 }
 
 void PolygonTool::deactivate() {
-    view()->setMouseTracking(false);
     isDrawing = false;
 }

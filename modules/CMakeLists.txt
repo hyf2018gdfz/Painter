@@ -3,6 +3,7 @@ file(GLOB_RECURSE CORE_SOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/tools/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/vision/*.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/common/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/color/*.cpp"
 )
 
 add_library(CoreLib STATIC
@@ -11,6 +12,7 @@ add_library(CoreLib STATIC
 
 target_include_directories(CoreLib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/color
     ${CMAKE_CURRENT_SOURCE_DIR}/commands
     ${CMAKE_CURRENT_SOURCE_DIR}/common
     ${CMAKE_CURRENT_SOURCE_DIR}/tools

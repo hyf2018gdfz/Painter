@@ -52,6 +52,8 @@ private:
     qreal rotateAngle;
     QGraphicsRectItem *border;
 
+    QColor curColor;
+
     friend class ITool;
 };
 #endif
