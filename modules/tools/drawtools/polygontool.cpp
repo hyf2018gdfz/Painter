@@ -51,7 +51,7 @@ void PolygonTool::finishDrawing() {
     QPolygonF finalPolygon(points);
     finalPolygon.push_back(points.first());
     auto finalItem = new QGraphicsPolygonItem(finalPolygon);
-    finalItem->setPen(QPen(Qt::black, 2));
+    finalItem->setPen(QPen(color(), 2));
     finalItem->setBrush(Qt::transparent);
     finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
     window()->pushCommand(new AddItemsCommand(scene(), nullptr, finalItem));

@@ -20,6 +20,9 @@ CanvasView::CanvasView(MainWindow *mw, QWidget *parent) : window(mw), QGraphicsV
     setRenderHint(QPainter::Antialiasing);
     setMouseTracking(true);
 
+    connect(scene, &QGraphicsScene::selectionChanged,
+            [this]() { emit selectionCountChanged(scene->selectedItems().size()); });
+
     border = scene->addRect(scene->sceneRect());
     border->setPen(QPen(QColor(255, 0, 0, 63), 2));
     border->setBrush(Qt::NoBrush);
@@ -28,10 +31,12 @@ CanvasView::CanvasView(MainWindow *mw, QWidget *parent) : window(mw), QGraphicsV
     initTools();
     setTool(ToolType::SELECT);
 
-    connect(scene, &QGraphicsScene::selectionChanged, this, &CanvasView::updateSelectionState);
+    // connect(scene, &QGraphicsScene::selectionChanged, this, &CanvasView::updateSelectionState);
 }
 
 void CanvasView::setTool(ToolType tool) {
+    auto *newTool = toolManager->getTool(tool);
+    if (curTool == newTool) return;
     if (curTool) curTool->deactivate();
     curTool = toolManager->getTool(tool);
     Q_ASSERT(curTool->category() == CATEGORY::SELECT_TOOL
@@ -55,10 +60,10 @@ void CanvasView::initTools() {
     toolManager->registerTool<CombineTool>(ToolType::COMBINE_SELECTED);
 }
 
-void CanvasView::updateSelectionState() {
-    int count = scene->selectedItems().size();
-    emit selectionCountChanged(count);
-}
+// void CanvasView::updateSelectionState() {
+//     int count = scene->selectedItems().size();
+//     emit selectionCountChanged(count);
+// }
 
 void CanvasView::executeCommand(ToolType tooltype) {
     auto *tool = toolManager->getTool(tooltype);
@@ -76,6 +81,7 @@ void CanvasView::executeCommand(ToolType tooltype) {
         break;
     }
     case CATEGORY::EXCLUSIVE_OPERATION: {
+        scene->clearSelection();
         setTool(tooltype);
         break;
     }
@@ -87,11 +93,8 @@ void CanvasView::executeCommand(ToolType tooltype) {
     }
 }
 
-void CanvasView::deleteSelectedItems() {
-    auto selectedItems = scene->selectedItems();
-    if (selectedItems.isEmpty()) return;
-    window->pushCommand(new DeleteItemsCommand(scene, selectedItems));
-    emit window->hasSelectionChanged(false);
+void CanvasView::changeColor(QColor newColor) {
+    curColor = newColor;
 }
 
 void CanvasView::savePic() {

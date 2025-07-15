@@ -119,6 +119,8 @@ void MainWindow::initLeftBar() {
     auto *colorField = new ColorField(leftBar);
     sidebarLayout->addWidget(colorField);
 
+    connect(colorField, &ColorField::colorChanged, view, &CanvasView::changeColor);
+
     dockWidget = new QDockWidget(tr("Color Panel"), this);
 
     dockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
@@ -146,19 +148,3 @@ void MainWindow::undo() {
 void MainWindow::redo() {
     undoStack->redo();
 }
-
-void MainWindow::deleteSelected() {
-    view->deleteSelectedItems();
-}
-
-// void MainWindow::zoomIn() {
-//     view->zoomIn();
-// }
-
-// void MainWindow::zoomOut() {
-//     view->zoomOut();
-// }
-
-// void MainWindow::rotateView(qreal angle) {
-//     view->rotateView(angle);
-// }

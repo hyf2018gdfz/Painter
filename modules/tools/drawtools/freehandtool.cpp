@@ -12,7 +12,7 @@ void FreeHandTool::onMousePress(QMouseEvent *event) {
         tempPath = QPainterPath();
         tempPath.moveTo(pos);
         previewItem = new QGraphicsPathItem();
-        previewItem->setPen(QPen(Qt::black, 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        previewItem->setPen(QPen(color(), 2, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         scene()->addItem(previewItem);
     }
 }
@@ -28,7 +28,7 @@ void FreeHandTool::onMouseMove(QMouseEvent *event) {
 void FreeHandTool::onMouseRelease(QMouseEvent *event) {
     if (isDrawing && previewItem) {
         auto finalItem = new QGraphicsPathItem(tempPath);
-        finalItem->setPen(QPen(Qt::black, 2));
+        finalItem->setPen(QPen(color(), 2));
         finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
         window()->pushCommand(new AddItemsCommand(scene(), nullptr, finalItem));
         scene()->removeItem(previewItem);

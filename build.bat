@@ -17,3 +17,5 @@ cd build
   -D CMAKE_CXX_COMPILER=%GXX% ^
   ..
 %MINGW_MAKE%
+
+  @REM -D CMAKE_BUILD_TYPE=Release ^

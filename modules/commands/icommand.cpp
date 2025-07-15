@@ -14,12 +14,14 @@ void AddItemsCommand::redo() {
 
 void DeleteItemsCommand::undo() {
     for (auto *item : m_items) {
+        qDebug() << "undo deleting" << item;
         m_scene->addItem(item);
     }
 }
 
 void DeleteItemsCommand::redo() {
     for (auto *item : m_items) {
+        qDebug() << "deleting" << item;
         m_scene->removeItem(item);
     }
 }

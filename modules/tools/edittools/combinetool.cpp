@@ -7,7 +7,6 @@
 void CombineTool::activate() {
     auto items = scene()->selectedItems();
     window()->pushCommand(new GroupCommand(scene(), items));
-    emit view() -> selectionCountChanged(0);
 }
 
 void CombineTool::deactivate() {

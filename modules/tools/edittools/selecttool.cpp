@@ -10,7 +10,7 @@ void SelectTool::onMouseMove(QMouseEvent *event) {
 }
 
 void SelectTool::onMouseRelease(QMouseEvent *event) {
-    emit window() -> hasSelectionChanged(!(scene()->selectedItems()).isEmpty());
+    emit view() -> selectionCountChanged(scene()->selectedItems().size());
 }
 
 void SelectTool::activate() {

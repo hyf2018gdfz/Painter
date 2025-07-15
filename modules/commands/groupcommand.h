@@ -3,6 +3,16 @@
 
 #include "commands/icommand.h"
 
+class IGraphicsItemGroup : public QGraphicsItem {
+public:
+    explicit IGraphicsItemGroup(QGraphicsItem *parent = nullptr) : QGraphicsItem(parent) {}
+    QRectF boundingRect() const override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+
+    void addToGroup(QGraphicsItem *item);
+    void removeFromGroup(QGraphicsItem *item);
+};
+
 class GroupCommand : public ICommand {
 public:
     GroupCommand(QGraphicsScene *scene, const QList<QGraphicsItem *> &items,
@@ -15,7 +25,7 @@ public:
 
 private:
     QList<QGraphicsItem *> m_items;
-    QGraphicsItemGroup *m_group = nullptr;
+    IGraphicsItemGroup *m_group = nullptr;
 };
 
 #endif

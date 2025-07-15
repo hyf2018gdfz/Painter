@@ -15,3 +15,7 @@ MainWindow *ITool::window() const {
 QGraphicsScene *ITool::scene() const {
     return m_view->scene;
 }
+
+QColor ITool::color() const {
+    return m_view->curColor;
+}

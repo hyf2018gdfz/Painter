@@ -37,6 +37,7 @@ protected:
     CanvasView *view() const;
     MainWindow *window() const;
     QGraphicsScene *scene() const;
+    QColor color() const;
 
 private:
     CanvasView *m_view;

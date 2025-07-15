@@ -42,7 +42,7 @@ void RectangleTool::onMouseRelease(QMouseEvent *event) {
         previewItem = nullptr;
         isDrawing = false;
         auto finalItem = new QGraphicsRectItem(finalRect);
-        finalItem->setPen(QPen(Qt::black, 2));
+        finalItem->setPen(QPen(color(), 2));
         finalItem->setBrush(Qt::transparent);
         finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
         finalItem->setTransformOriginPoint(startPos);
