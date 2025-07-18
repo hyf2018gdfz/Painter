@@ -30,8 +30,6 @@ CanvasView::CanvasView(MainWindow *mw, QWidget *parent) : window(mw), QGraphicsV
 
     initTools();
     setTool(ToolType::SELECT);
-
-    // connect(scene, &QGraphicsScene::selectionChanged, this, &CanvasView::updateSelectionState);
 }
 
 void CanvasView::setTool(ToolType tool) {

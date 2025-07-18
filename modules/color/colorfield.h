@@ -3,15 +3,15 @@
 
 #include <QWidget>
 #include <QColor>
+#include <QSpinBox>
+#include <QLabel>
 
-class ColorField : public QWidget {
+class ColorWheel : public QWidget {
     Q_OBJECT
-
 public:
-    explicit ColorField(QWidget *parent = nullptr);
-
+    explicit ColorWheel(QWidget *parent = nullptr);
     QColor color() const { return curColor; }
-    void setColor(const QColor &color);
+    void setColor(const QColor &color, bool passive = true);
 
 signals:
     void colorChanged(QColor newColor);
@@ -33,18 +33,42 @@ private:
     bool isInSquare(const QPointF &pos) const;
     void drawColorWheel();
     void drawColorSquare(int hue);
-    void drawColorHint();
-    void updateCursor(const QPointF &pos);
     void updateWheelGeometry();
+    void updateCursor(const QPointF &pos);
 
     QColor curColor;
 
+    QRectF wheelRect, squareRect;
+
     static const int wheelWidth;
     static const int wheelThickness;
-    static const int hintWidth;
-    static const int hintHeight;
+};
 
-    QRectF wheelRect, squareRect;
+class ColorField : public QWidget {
+    Q_OBJECT
+
+public:
+    explicit ColorField(QWidget *parent = nullptr);
+
+    QColor color() const { return curColor; }
+    void setColor(const QColor &color);
+
+signals:
+    void colorChanged(QColor newColor);
+
+private:
+    void updateUIFromColor();
+
+    QColor curColor;
+
+    static const int previewWidth;
+    static const int previewHeight;
+
+    ColorWheel *wheelArea;
+
+    QSpinBox *rSpin, *gSpin, *bSpin;
+    QLabel *colorPreview;
+    QLineEdit *hexEdit;
 };
 
 #endif

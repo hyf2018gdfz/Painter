@@ -3,41 +3,45 @@
 #include <QPainter>
 #include <QEvent>
 #include <QEnterEvent>
+#include <QLayout>
+#include <QFormLayout>
+#include <QLineEdit>
 
 #include "vision/canvasview.h"
 
-const int ColorField::wheelWidth = 45;
-const int ColorField::wheelThickness = 20;
-const int ColorField::hintWidth = 20;
-const int ColorField::hintHeight = 20;
+const int ColorWheel::wheelWidth = 45;
+const int ColorWheel::wheelThickness = 20;
+const int ColorField::previewWidth = 40;
+const int ColorField::previewHeight = 20;
 
-ColorField::ColorField(QWidget *parent) : QWidget(parent) {
+ColorWheel::ColorWheel(QWidget *parent) : QWidget(parent) {
+    setMouseTracking(true);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
     setMinimumSize(150, 150);
-    setCursor(Qt::ArrowCursor);
-    setMouseTracking(true);
-    curColor = Qt::red;
+    curColor.setHsvF(0, 1, 0);
 
     int r = qMin(width(), height()), wheelRadius = r / 2 - wheelThickness / 2;
     wheelRect = QRectF(wheelThickness / 2, wheelThickness / 2, wheelRadius * 2, wheelRadius * 2);
     squareRect = QRectF(wheelWidth, wheelWidth, r - wheelWidth * 2, r - wheelWidth * 2);
 }
 
-void ColorField::setColor(const QColor &color) {
+void ColorWheel::setColor(const QColor &color, bool passive) {
     if (curColor == color) return;
     curColor = color;
-    emit colorChanged(curColor);
+    if (!passive) {
+        emit colorChanged(curColor);
+    }
+    update();
 }
 
-void ColorField::paintEvent(QPaintEvent *event) {
+void ColorWheel::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event);
 
     drawColorWheel();
     drawColorSquare(curColor.hue());
-    drawColorHint();
 }
 
-void ColorField::drawColorWheel() {
+void ColorWheel::drawColorWheel() {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
@@ -53,7 +57,7 @@ void ColorField::drawColorWheel() {
     painter.drawEllipse(wheelRect);
 }
 
-void ColorField::drawColorSquare(int hue) {
+void ColorWheel::drawColorSquare(int hue) {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
@@ -68,37 +72,23 @@ void ColorField::drawColorSquare(int hue) {
     painter.fillRect(squareRect, valueGradient);
 }
 
-void ColorField::drawColorHint() {
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    int hintSize = 40;
-    QRect hintRect(width() - hintSize - 10, height() - hintSize - 10, hintSize, hintSize);
-
-    painter.fillRect(hintRect, curColor);
-
-    QPen pen(Qt::black, 1);
-    painter.setPen(pen);
-    painter.drawRect(hintRect);
-}
-
-bool ColorField::isInWheel(const QPointF &pos) const {
+bool ColorWheel::isInWheel(const QPointF &pos) const {
     qreal distance = QLineF(pos, wheelRect.center()).length();
     qreal outerRadius = wheelRect.width() / 2 + wheelThickness / 2;
     qreal innerRadius = wheelRect.width() / 2 - wheelThickness / 2;
     return distance <= outerRadius && distance >= innerRadius;
 }
 
-bool ColorField::isInSquare(const QPointF &pos) const {
+bool ColorWheel::isInSquare(const QPointF &pos) const {
     return squareRect.contains(pos);
 }
 
-void ColorField::resizeEvent(QResizeEvent *event) {
+void ColorWheel::resizeEvent(QResizeEvent *event) {
     QWidget::resizeEvent(event);
     updateWheelGeometry();
 }
 
-void ColorField::updateWheelGeometry() {
+void ColorWheel::updateWheelGeometry() {
     int r = qMin(width(), height());
     int centerX = width() / 2;
     int centerY = height() / 2;
@@ -110,7 +100,7 @@ void ColorField::updateWheelGeometry() {
     squareRect = QRectF(centerX - squareSize / 2, centerY - squareSize / 2, squareSize, squareSize);
 }
 
-void ColorField::updateCursor(const QPointF &pos) {
+void ColorWheel::updateCursor(const QPointF &pos) {
     if (isInWheel(pos) || isInSquare(pos)) {
         setCursor(Qt::CrossCursor);
     } else {
@@ -118,28 +108,26 @@ void ColorField::updateCursor(const QPointF &pos) {
     }
 }
 
-void ColorField::mousePressEvent(QMouseEvent *event) {
+void ColorWheel::mousePressEvent(QMouseEvent *event) {
     auto pos = event->position();
     if (isInWheel(pos)) {
         // 计算颜色
-        qreal angle = QLineF(wheelRect.center(), event->position()).angle();
+        qreal angle = QLineF(wheelRect.center(), pos).angle();
         QColor newColor = curColor;
         newColor.setHsvF(angle / 360.0, curColor.hsvSaturationF(), curColor.valueF());
-        update();
-        setColor(newColor);
+        setColor(newColor, false);
     } else if (isInSquare(pos)) {
         qreal hue = curColor.hueF();
-        qreal saturation = (event->position().x() - squareRect.left()) / squareRect.width();
-        qreal value = 1.0 - (event->position().y() - squareRect.top()) / squareRect.height();
+        qreal saturation = (pos.x() - squareRect.left()) / squareRect.width();
+        qreal value = 1.0 - (pos.y() - squareRect.top()) / squareRect.height();
         QColor newColor;
         newColor.setHsvF(hue, saturation, value);
-        update();
-        setColor(newColor);
+        setColor(newColor, false);
     }
     updateCursor(event->position());
 }
 
-void ColorField::mouseMoveEvent(QMouseEvent *event) {
+void ColorWheel::mouseMoveEvent(QMouseEvent *event) {
     auto pos = event->position();
     if (event->buttons() & Qt::LeftButton) {
         mousePressEvent(event); // 处理颜色更新
@@ -148,17 +136,101 @@ void ColorField::mouseMoveEvent(QMouseEvent *event) {
     QWidget::mouseMoveEvent(event);
 }
 
-void ColorField::mouseReleaseEvent(QMouseEvent *event) {
+void ColorWheel::mouseReleaseEvent(QMouseEvent *event) {
     updateCursor(event->position());
     QWidget::mouseReleaseEvent(event);
 }
 
-void ColorField::enterEvent(QEnterEvent *event) {
+void ColorWheel::enterEvent(QEnterEvent *event) {
     updateCursor(event->position());
     QWidget::enterEvent(event);
 }
 
-void ColorField::leaveEvent(QEvent *event) {
+void ColorWheel::leaveEvent(QEvent *event) {
     setCursor(Qt::ArrowCursor);
     QWidget::leaveEvent(event);
+}
+
+ColorField::ColorField(QWidget *parent) : QWidget(parent) {
+    setCursor(Qt::ArrowCursor);
+    setMouseTracking(true);
+    setMinimumHeight(300);
+    curColor.setHsvF(0, 1, 0);
+
+    auto *mainLayout = new QVBoxLayout(this);
+    mainLayout->setSpacing(5);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+
+    // 上方色轮
+    wheelArea = new ColorWheel(this);
+
+    // 左下方 RGB 输入
+    auto *leftBottomLayout = new QFormLayout();
+    rSpin = new QSpinBox();
+    gSpin = new QSpinBox();
+    bSpin = new QSpinBox();
+    for (auto *spin : {rSpin, gSpin, bSpin}) {
+        spin->setRange(0, 255);
+        spin->setSingleStep(1);
+        spin->setFixedWidth(60);
+    }
+    leftBottomLayout->addRow("R:", rSpin);
+    leftBottomLayout->addRow("G:", gSpin);
+    leftBottomLayout->addRow("B:", bSpin);
+
+    // 右下方色彩预览和 RGB 十六进制值
+    auto *rightBottomLayout = new QVBoxLayout();
+    colorPreview = new QLabel();
+    colorPreview->setFixedSize(previewWidth, previewHeight);
+    colorPreview->setStyleSheet("background: black; border: 1px solid black;");
+    hexEdit = new QLineEdit();
+    hexEdit->setReadOnly(true);
+    rightBottomLayout->addWidget(colorPreview);
+    rightBottomLayout->addWidget(hexEdit);
+
+    auto *bottomLayout = new QHBoxLayout();
+    bottomLayout->addLayout(leftBottomLayout);
+    bottomLayout->addLayout(rightBottomLayout);
+
+    mainLayout->addWidget(wheelArea);
+    mainLayout->addLayout(bottomLayout);
+    mainLayout->addStretch();
+
+    connect(rSpin, &QSpinBox::textChanged, [this]() {
+        QColor c(rSpin->text().toInt(), gSpin->text().toInt(), bSpin->text().toInt());
+        setColor(c);
+    });
+    connect(gSpin, &QSpinBox::textChanged, [this]() {
+        QColor c(rSpin->text().toInt(), gSpin->text().toInt(), bSpin->text().toInt());
+        setColor(c);
+    });
+    connect(bSpin, &QSpinBox::textChanged, [this]() {
+        QColor c(rSpin->text().toInt(), gSpin->text().toInt(), bSpin->text().toInt());
+        setColor(c);
+    });
+    connect(wheelArea, &ColorWheel::colorChanged, [this](QColor col) { setColor(col); });
+}
+
+void ColorField::updateUIFromColor() {
+    for (auto *spin : {rSpin, gSpin, bSpin}) {
+        spin->blockSignals(true);
+    }
+    rSpin->setValue(curColor.red());
+    gSpin->setValue(curColor.green());
+    bSpin->setValue(curColor.blue());
+    for (auto *spin : {rSpin, gSpin, bSpin}) {
+        spin->blockSignals(false);
+    }
+    hexEdit->setText(curColor.name());
+    colorPreview->setStyleSheet(
+        QString("background: %1; border: 1px solid black;").arg(curColor.name()));
+}
+
+void ColorField::setColor(const QColor &color) {
+    if (curColor == color) return;
+    curColor = color;
+    wheelArea->setColor(color, true);
+    updateUIFromColor();
+    emit colorChanged(color);
+    update();
 }
