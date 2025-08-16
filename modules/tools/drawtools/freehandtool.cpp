@@ -29,7 +29,7 @@ void FreeHandTool::onMouseRelease(QMouseEvent *event) {
     if (isDrawing && previewItem) {
         auto finalItem = new QGraphicsPathItem(tempPath);
         finalItem->setPen(QPen(color(), 2));
-        finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+        finalItem->setFlags(QGraphicsItem::ItemIsSelectable);
         window()->pushCommand(new AddItemsCommand(scene(), nullptr, finalItem));
         scene()->removeItem(previewItem);
         delete previewItem;

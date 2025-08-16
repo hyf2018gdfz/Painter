@@ -11,6 +11,7 @@
 
 #include "vision/canvasview.h"
 #include "color/colorfield.h"
+#include "commands/groupcommand.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), undoStack(new QUndoStack(this)) {
     view = new CanvasView(this);
@@ -73,6 +74,23 @@ void MainWindow::initMenus() {
     connect(view, &CanvasView::selectionCountChanged,
             [combineAction](int count) { combineAction->setEnabled(count >= 2); });
 
+    // 添加解组菜单项
+    QAction *decombineAction = editMenu->addAction("解组");
+    decombineAction->setShortcut(QKeySequence("Ctrl+Shift+G"));
+    decombineAction->setEnabled(false);
+    connect(decombineAction, &QAction::triggered,
+            [this]() { view->executeCommand(ToolType::DECOMBINE_SELECTED); });
+    connect(view, &CanvasView::selectionCountChanged, [this, decombineAction](int count) {
+        // 仅当选中项为组合图形时启用
+        if (count == 1) {
+            auto items = view->get_scene()->selectedItems();
+            bool isGroup = dynamic_cast<IGraphicsItemGroup *>(items.value(0)) != nullptr;
+            decombineAction->setEnabled(isGroup);
+        } else {
+            decombineAction->setEnabled(false);
+        }
+    });
+
     QMenu *viewMenu = menuBar->addMenu("视图");
     QAction *zoomInAction = viewMenu->addAction("放大");
     zoomInAction->setShortcut(QKeySequence("Ctrl++"));
@@ -109,7 +127,7 @@ void MainWindow::initMenus() {
 /// TODO: 左侧画笔选择框
 void MainWindow::initLeftBar() {
     leftBar = new QWidget(this);
-    leftBar->setFixedWidth(200);
+    leftBar->setFixedWidth(250);
     leftBar->setStyleSheet("background: #f0f0f0;");
 
     QVBoxLayout *sidebarLayout = new QVBoxLayout(leftBar);

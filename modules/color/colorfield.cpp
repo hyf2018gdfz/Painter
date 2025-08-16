@@ -172,7 +172,7 @@ ColorField::ColorField(QWidget *parent) : QWidget(parent) {
     for (auto *spin : {rSpin, gSpin, bSpin}) {
         spin->setRange(0, 255);
         spin->setSingleStep(1);
-        spin->setFixedWidth(60);
+        spin->setFixedWidth(80);
     }
     leftBottomLayout->addRow("R:", rSpin);
     leftBottomLayout->addRow("G:", gSpin);

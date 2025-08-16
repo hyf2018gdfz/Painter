@@ -11,3 +11,14 @@ void CombineTool::activate() {
 
 void CombineTool::deactivate() {
 }
+
+void DecombineTool::activate() {
+    auto items = scene()->selectedItems();
+    if (items.size() != 1) return;
+    auto group = dynamic_cast<IGraphicsItemGroup *>(items.first());
+    if (!group) return;
+    window()->pushCommand(new UngroupCommand(scene(), group));
+}
+
+void DecombineTool::deactivate() {
+}

@@ -18,6 +18,7 @@ public:
     void setTool(ToolType tool);
     void savePic();
     qreal getRotateAngle() const;
+    QGraphicsScene *get_scene() const { return this->scene; }
 
     void executeCommand(ToolType tool);
 

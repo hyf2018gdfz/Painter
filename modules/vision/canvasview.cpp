@@ -56,6 +56,7 @@ void CanvasView::initTools() {
     toolManager->registerTool<RotateViewTool>(ToolType::ROTATEVIEWCCW, -3);
     toolManager->registerTool<DeleteTool>(ToolType::DELETE_SELECTED);
     toolManager->registerTool<CombineTool>(ToolType::COMBINE_SELECTED);
+    toolManager->registerTool<DecombineTool>(ToolType::DECOMBINE_SELECTED);
 }
 
 // void CanvasView::updateSelectionState() {

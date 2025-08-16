@@ -29,6 +29,13 @@ public:
 
     void activate() override;
     void deactivate() override;
+
+private:
+    QPointF m_lastPos;
+    QPointF m_startPos;
+    bool m_moving = false;
+    QList<QGraphicsItem *> m_previewItems;
+    void createPreviewItems();
 };
 
 class CombineTool : public EditTool {
@@ -54,6 +61,26 @@ public:
 class DeleteTool : public EditTool {
 public:
     explicit DeleteTool(CanvasView *view) : EditTool(view) {}
+
+    CATEGORY category() const override { return CATEGORY::DEPENDENT_SELECTION; }
+
+    void onMousePress(QMouseEvent *event) override {}
+    void onMouseMove(QMouseEvent *event) override {}
+    void onMouseRelease(QMouseEvent *event) override {}
+    void onMouseDoubleClick(QMouseEvent *) override {}
+
+    void onKeyPress(QKeyEvent *) override {}
+    void onKeyRelease(QKeyEvent *) override {}
+
+    void onWheel(QWheelEvent *) override {}
+
+    void activate() override;
+    void deactivate() override;
+};
+
+class DecombineTool : public EditTool {
+public:
+    explicit DecombineTool(CanvasView *view) : EditTool(view) {}
 
     CATEGORY category() const override { return CATEGORY::DEPENDENT_SELECTION; }
 
