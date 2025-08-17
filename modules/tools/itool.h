@@ -5,12 +5,17 @@
 #include <QMouseEvent>
 #include <QKeyEvent>
 #include <QWheelEvent>
+#include <QTabletEvent>
+#include <QPen>
+#include <QBrush>
+#include <QColor>
 #include "common/common.h"
 
 class MainWindow;
 class CanvasView;
 
-class ITool {
+class ITool : public QObject {
+    Q_OBJECT
 public:
     explicit ITool(CanvasView *view) : m_view(view) {}
     virtual ~ITool() = default;
@@ -31,12 +36,16 @@ public:
     virtual void onKeyPress(QKeyEvent *) = 0;
     virtual void onKeyRelease(QKeyEvent *) = 0;
 
+    virtual void onTabletEvent(QTabletEvent *event) {}
+
     virtual void onWheel(QWheelEvent *) = 0;
 
 protected:
     CanvasView *view() const;
     MainWindow *window() const;
     QGraphicsScene *scene() const;
+    virtual QPen pen() const;
+    QBrush brush() const;
     QColor color() const;
 
 private:

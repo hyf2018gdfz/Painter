@@ -11,7 +11,7 @@ void EllipseTool::onMousePress(QMouseEvent *event) {
         isDrawing = true;
         startPos = pos;
         auto rect = QRectF(startPos, startPos);
-        previewItem = scene()->addEllipse(rect, QPen(Qt::blue, 1, Qt::DashLine));
+        previewItem = scene()->addEllipse(rect, QPen(Qt::blue, pen().widthF() / 1.5, Qt::DashLine));
         previewItem->setTransformOriginPoint(startPos);
         previewItem->setRotation(-view()->getRotateAngle());
     }
@@ -42,7 +42,7 @@ void EllipseTool::onMouseRelease(QMouseEvent *event) {
         previewItem = nullptr;
         isDrawing = false;
         auto *finalItem = new QGraphicsEllipseItem(finalElli);
-        finalItem->setPen(QPen(color(), 2));
+        finalItem->setPen(pen());
         finalItem->setBrush(Qt::transparent);
         finalItem->setFlags(QGraphicsItem::ItemIsSelectable);
         finalItem->setTransformOriginPoint(startPos);

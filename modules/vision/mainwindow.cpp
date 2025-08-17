@@ -11,7 +11,10 @@
 
 #include "vision/canvasview.h"
 #include "color/colorfield.h"
+#include "color/pencontrol.h"
 #include "commands/groupcommand.h"
+#include "tools/toolmanager.h"
+#include "tools/drawtools/drawtool.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), undoStack(new QUndoStack(this)) {
     view = new CanvasView(this);
@@ -133,11 +136,24 @@ void MainWindow::initLeftBar() {
     QVBoxLayout *sidebarLayout = new QVBoxLayout(leftBar);
     sidebarLayout->setContentsMargins(5, 5, 5, 5);
     sidebarLayout->setSpacing(10);
+    sidebarLayout->setAlignment(Qt::AlignTop);
 
     auto *colorField = new ColorField(leftBar);
-    sidebarLayout->addWidget(colorField);
+    sidebarLayout->addWidget(colorField, 0, Qt::AlignTop);
+    auto *penControl = new PenControl(leftBar);
+    sidebarLayout->addWidget(penControl, 0, Qt::AlignTop);
 
-    connect(colorField, &ColorField::colorChanged, view, &CanvasView::changeColor);
+    connect(colorField, &ColorField::colorChanged, penControl, &PenControl::changeColor);
+    connect(penControl, &PenControl::penChanged, view, &CanvasView::changePen);
+    penControl->updatePen();
+    FreeHandTool *freeHandTool =
+        dynamic_cast<FreeHandTool *>(view->toolManager->getTool(ToolType::FREEHAND));
+    if (freeHandTool) {
+        connect(penControl, &PenControl::widthPressureChanged, freeHandTool,
+                &FreeHandTool::changeWidthPressure);
+        connect(penControl, &PenControl::opacityPressureChanged, freeHandTool,
+                &FreeHandTool::changeOpacityPressure);
+    }
 
     dockWidget = new QDockWidget(tr("Color Panel"), this);
 

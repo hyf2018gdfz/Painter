@@ -2,6 +2,9 @@
 #define CANVAS_VIEW_H
 
 #include <QGraphicsView>
+#include <QColor>
+#include <QPen>
+#include <QBrush>
 
 #include <memory>
 
@@ -22,11 +25,15 @@ public:
 
     void executeCommand(ToolType tool);
 
+    ToolManager *toolManager;
+
 signals:
     void selectionCountChanged(int count);
 
 public slots:
     void changeColor(QColor newColor);
+    void changePen(QPen newPen);
+    void changeBrush(QBrush newBrush);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -39,13 +46,14 @@ protected:
 
     void wheelEvent(QWheelEvent *event) override;
 
+    void tabletEvent(QTabletEvent *event) override;
+
 private:
     void initTools();
     // void updateSelectionState();
 
     MainWindow *window;
     QGraphicsScene *scene;
-    ToolManager *toolManager;
 
     ITool *curTool = nullptr; // 此处的tool应该是选择或者某种画图
 
@@ -53,6 +61,8 @@ private:
     QGraphicsRectItem *border;
 
     QColor curColor;
+    QPen curPen;
+    QBrush curBrush;
 
     friend class ITool;
 };

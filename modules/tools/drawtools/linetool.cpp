@@ -11,15 +11,22 @@ void LineTool::onMousePress(QMouseEvent *event) {
         isDrawing = true;
         startPos = pos;
         auto line = QLineF(startPos, startPos);
-        previewItem = scene()->addLine(line, QPen(Qt::blue, 1, Qt::DashLine));
+        previewItem = scene()->addLine(line, QPen(Qt::blue, pen().widthF() / 1.5, Qt::DashLine));
     }
 }
 
 void LineTool::onMouseMove(QMouseEvent *event) {
     auto pos = view()->mapToScene(event->pos());
     if (isDrawing && previewItem) {
-        auto line = QLineF(startPos, pos);
-        // TODO: 按 Shift 画八个方向的直线
+        QLineF line(startPos, pos);
+        if (event->modifiers() & Qt::ShiftModifier) {
+            qreal angle = fmod(line.angle() + 360.0, 360.0);
+            qreal targetAngle = qRound(angle / 45.0) * 45.0;
+            qreal length = line.length();
+            QPointF delta(length * qCos(targetAngle * M_PI / 180.0),
+                          -length * qSin(targetAngle * M_PI / 180.0));
+            line.setP2(startPos + delta);
+        }
         previewItem->setLine(line);
     }
 }
@@ -32,7 +39,7 @@ void LineTool::onMouseRelease(QMouseEvent *event) {
         previewItem = nullptr;
         isDrawing = false;
         auto finalItem = new QGraphicsLineItem(finalLine);
-        finalItem->setPen(QPen(color(), 2));
+        finalItem->setPen(pen());
         finalItem->setFlags(QGraphicsItem::ItemIsSelectable);
         window()->pushCommand(new AddItemsCommand(scene(), nullptr, finalItem));
     }

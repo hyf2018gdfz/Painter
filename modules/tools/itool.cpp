@@ -19,3 +19,11 @@ QGraphicsScene *ITool::scene() const {
 QColor ITool::color() const {
     return m_view->curColor;
 }
+
+QPen ITool::pen() const {
+    return m_view->curPen;
+}
+
+QBrush ITool::brush() const {
+    return m_view->curBrush;
+}

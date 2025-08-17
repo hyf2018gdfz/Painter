@@ -94,6 +94,16 @@ void CanvasView::executeCommand(ToolType tooltype) {
 
 void CanvasView::changeColor(QColor newColor) {
     curColor = newColor;
+    curPen.setColor(newColor);
+    curBrush.setColor(newColor);
+}
+
+void CanvasView::changePen(QPen newPen) {
+    curPen = newPen;
+}
+
+void CanvasView::changeBrush(QBrush newBrush) {
+    curBrush = newBrush;
 }
 
 void CanvasView::savePic() {
@@ -190,4 +200,12 @@ void CanvasView::wheelEvent(QWheelEvent *event) {
     } else {
         QGraphicsView::wheelEvent(event);
     }
+}
+
+void CanvasView::tabletEvent(QTabletEvent *event) {
+    if (auto isfreehand = dynamic_cast<FreeHandTool *>(curTool)) {
+        isfreehand->onTabletEvent(event);
+    }
+
+    event->accept();
 }

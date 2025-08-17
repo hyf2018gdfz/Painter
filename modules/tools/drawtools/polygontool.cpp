@@ -12,7 +12,7 @@ void PolygonTool::onMousePress(QMouseEvent *event) {
         points.clear();
         points.push_back(pos);
         previewItem = new QGraphicsPathItem();
-        previewItem->setPen(QPen(Qt::blue, 1, Qt::SolidLine));
+        previewItem->setPen(QPen(Qt::blue, pen().widthF() / 1.5, Qt::SolidLine));
         previewDashLine = new QGraphicsPathItem(previewItem);
         snapIndicator = new QGraphicsEllipseItem(previewItem);
         scene()->addItem(previewItem);
@@ -51,7 +51,7 @@ void PolygonTool::finishDrawing() {
     QPolygonF finalPolygon(points);
     finalPolygon.push_back(points.first());
     auto finalItem = new QGraphicsPolygonItem(finalPolygon);
-    finalItem->setPen(QPen(color(), 2));
+    finalItem->setPen(pen());
     finalItem->setBrush(Qt::transparent);
     finalItem->setFlags(QGraphicsItem::ItemIsSelectable);
     window()->pushCommand(new AddItemsCommand(scene(), nullptr, finalItem));
@@ -82,7 +82,7 @@ void PolygonTool::updateDrawing(const QPointF &pos) {
     if (previewDashLine) {
         delete previewDashLine;
         previewDashLine = new QGraphicsPathItem(previewItem);
-        previewDashLine->setPen(QPen(Qt::blue, 1, Qt::DashLine));
+        previewDashLine->setPen(QPen(Qt::blue, pen().widthF() / 1.5, Qt::DashLine));
         previewDashLine->setZValue(1);
     }
 

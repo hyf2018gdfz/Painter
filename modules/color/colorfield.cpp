@@ -185,6 +185,7 @@ ColorField::ColorField(QWidget *parent) : QWidget(parent) {
     colorPreview->setStyleSheet("background: black; border: 1px solid black;");
     hexEdit = new QLineEdit();
     hexEdit->setReadOnly(true);
+    hexEdit->setText(curColor.name());
     rightBottomLayout->addWidget(colorPreview);
     rightBottomLayout->addWidget(hexEdit);
 

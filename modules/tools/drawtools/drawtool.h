@@ -22,6 +22,13 @@ public:
     bool isBlocked() const override { return isDrawing; };
 
 protected:
+    virtual QPen pen() const override {
+        QPen tmpPen = ITool::pen();
+        tmpPen.setStyle(Qt::SolidLine);
+        tmpPen.setCapStyle(Qt::SquareCap);
+        tmpPen.setJoinStyle(Qt::BevelJoin);
+        return tmpPen;
+    }
     bool isDrawing = false;
 };
 
@@ -89,6 +96,8 @@ private:
     void finishDrawing();
 };
 
+class VariableSegItem;
+
 class FreeHandTool : public DrawTool {
 public:
     explicit FreeHandTool(CanvasView *view) : DrawTool(view) {}
@@ -97,8 +106,26 @@ public:
     void onMouseMove(QMouseEvent *event) override;
     void onMouseRelease(QMouseEvent *event) override;
 
+    void onTabletEvent(QTabletEvent *event) override;
+
+public slots:
+    void changeWidthPressure(bool enabled);
+    void changeOpacityPressure(bool enabled);
+
+protected:
+    QPen pen() const override { return ITool::pen(); }
+
 private:
     QGraphicsPathItem *previewItem = nullptr;
     QPainterPath tempPath;
+    bool widthPressure = false;
+    bool opacityPressure = false;
+
+    QVector<QPointF> segPoints;
+    QVector<qreal> segPressures;
+    VariableSegItem *previewSegItem = nullptr;
+
+    enum class InputSource { None, Mouse, Tablet };
+    InputSource activeInput = InputSource::None;
 };
 #endif
