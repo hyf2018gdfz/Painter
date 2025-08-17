@@ -53,7 +53,7 @@ void PolygonTool::finishDrawing() {
     auto finalItem = new QGraphicsPolygonItem(finalPolygon);
     finalItem->setPen(QPen(color(), 2));
     finalItem->setBrush(Qt::transparent);
-    finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+    finalItem->setFlags(QGraphicsItem::ItemIsSelectable);
     window()->pushCommand(new AddItemsCommand(scene(), nullptr, finalItem));
 }
 

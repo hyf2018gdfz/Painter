@@ -33,7 +33,7 @@ void LineTool::onMouseRelease(QMouseEvent *event) {
         isDrawing = false;
         auto finalItem = new QGraphicsLineItem(finalLine);
         finalItem->setPen(QPen(color(), 2));
-        finalItem->setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+        finalItem->setFlags(QGraphicsItem::ItemIsSelectable);
         window()->pushCommand(new AddItemsCommand(scene(), nullptr, finalItem));
     }
 }

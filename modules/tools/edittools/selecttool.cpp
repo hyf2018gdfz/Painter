@@ -4,25 +4,34 @@
 #include "commands/movecommand.h"
 #include "commands/groupcommand.h"
 
+/// INFO: 检查的选中状态看的是图形的碰撞框shape
 void SelectTool::onMousePress(QMouseEvent *event) {
-    // setBlocked(true);
     m_lastPos = view()->mapToScene(event->pos());
 
-    // 如果点击的位置没有选中的图形，清除现有选择
     QGraphicsItem *clickedItem = scene()->itemAt(m_lastPos, view()->transform());
-    if (!clickedItem || !clickedItem->isSelected()) {
+
+    bool clickInSelected = false;
+    for (auto *item : scene()->selectedItems()) {
+        auto itemPos = item->mapFromScene(m_lastPos);
+        // qDebug() << item->shape() << " " << itemPos;
+        if (item->shape().contains(itemPos)) {
+            clickInSelected = true;
+            break;
+        }
+    }
+    if (!clickInSelected) {
         scene()->clearSelection();
         if (clickedItem) {
             clickedItem->setSelected(true);
         }
     }
 
-    // 创建预览图形
     if (!scene()->selectedItems().isEmpty()) {
         m_moving = true;
         m_startPos = m_lastPos;
         createPreviewItems();
     }
+    // qDebug() << m_lastPos << " " << clickedItem << " " << clickInSelected;
 }
 
 void SelectTool::onMouseMove(QMouseEvent *event) {
@@ -55,7 +64,6 @@ void SelectTool::onMouseRelease(QMouseEvent *event) {
 
         m_moving = false;
     }
-    // setBlocked(false);
     emit view() -> selectionCountChanged(scene()->selectedItems().size());
 }
 
@@ -64,19 +72,16 @@ void SelectTool::createPreviewItems() {
         // 创建克隆图形
         QGraphicsItem *preview = nullptr;
         if (auto *group = dynamic_cast<IGraphicsItemGroup *>(item)) {
-            preview = new IGraphicsItemGroup();
-            // 复制组内所有图形
-            for (auto *child : group->childItems()) {
-                auto *childPreview = scene()->addRect(child->boundingRect());
-                childPreview->setParentItem(preview);
-            }
+            // 对于组合图形，只显示其边界矩形
+            auto rect = group->mapRectToScene(group->boundingRect());
+            preview = scene()->addRect(rect);
+            preview->setPos(QPointF(0, 0));
         } else {
             preview = scene()->addRect(item->boundingRect());
+            preview->setPos(item->scenePos());
+            preview->setTransform(item->transform());
         }
 
-        // 设置预览图形的属性
-        preview->setPos(item->scenePos());
-        preview->setTransform(item->transform());
         preview->setOpacity(0.5);
         m_previewItems.append(preview);
     }

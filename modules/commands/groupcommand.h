@@ -2,12 +2,8 @@
 #define GROUP_COMMAND_H
 
 #include "commands/icommand.h"
-
-struct ItemState {
-    QGraphicsItem *item;
-    QGraphicsItem *oldParent;
-    qreal z;
-};
+#include <QGraphicsItem>
+#include <QList>
 
 class IGraphicsItemGroup : public QGraphicsItem {
 public:
@@ -22,18 +18,22 @@ protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
 };
 
+/// 保存每个子项的状态（z 值 + 在 group 坐标下的位置）
+struct ItemState {
+    QGraphicsItem *item;
+    qreal z;
+    QPointF posInGroup;
+};
+
 class GroupCommand : public ICommand {
 public:
     GroupCommand(QGraphicsScene *scene, const QList<QGraphicsItem *> &items,
-                 QUndoCommand *parent = nullptr) : ICommand(scene, parent) {
-        setText("组合图形");
-        for (auto *st : items) {
-            m_items.append({st, st->parentItem(), st->zValue()});
-        }
-    }
+                 QUndoCommand *parent = nullptr);
 
     void undo() override;
     void redo() override;
+
+    IGraphicsItemGroup *group() const { return m_group; }
 
 private:
     QList<ItemState> m_items;
@@ -43,20 +43,14 @@ private:
 class UngroupCommand : public ICommand {
 public:
     UngroupCommand(QGraphicsScene *scene, IGraphicsItemGroup *group,
-                   QUndoCommand *parent = nullptr) : ICommand(scene, parent), m_group(group) {
-        setText("解组图形");
-        for (auto *st : group->childItems()) {
-            m_items.append({st, group, st->zValue()});
-        }
-    }
+                   QUndoCommand *parent = nullptr);
 
     void undo() override;
     void redo() override;
 
 private:
-    IGraphicsItemGroup *m_group;
     QList<ItemState> m_items;
-    QPointF m_groupPos; // 添加此行以记录组合的位置
+    IGraphicsItemGroup *m_group = nullptr;
 };
 
 #endif
