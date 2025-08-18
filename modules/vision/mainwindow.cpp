@@ -76,8 +76,6 @@ void MainWindow::initMenus() {
     combineAction->setEnabled(false);
     connect(view, &CanvasView::selectionCountChanged,
             [combineAction](int count) { combineAction->setEnabled(count >= 2); });
-
-    // 添加解组菜单项
     QAction *decombineAction = editMenu->addAction("解组");
     decombineAction->setShortcut(QKeySequence("Ctrl+Shift+G"));
     decombineAction->setEnabled(false);
@@ -111,6 +109,8 @@ void MainWindow::initMenus() {
     rotateCWAction->setShortcut(QKeySequence("Shift+-"));
     connect(rotateCWAction, &QAction::triggered,
             [this]() { view->executeCommand(ToolType::ROTATEVIEWCW); });
+    QAction *showLeftPanel = viewMenu->addAction("显示左侧栏");
+    connect(showLeftPanel, &QAction::triggered, [this]() { dockWidget->setVisible(true); });
 
     QMenu *toolMenu = menuBar->addMenu("工具");
     QAction *selectTool = toolMenu->addAction("选择");
@@ -127,7 +127,6 @@ void MainWindow::initMenus() {
     connect(polyTool, &QAction::triggered, [this]() { setCurrentTool(ToolType::POLYGON); });
 }
 
-/// TODO: 左侧画笔选择框
 void MainWindow::initLeftBar() {
     leftBar = new QWidget(this);
     leftBar->setFixedWidth(250);
@@ -157,7 +156,8 @@ void MainWindow::initLeftBar() {
 
     dockWidget = new QDockWidget(tr("Color Panel"), this);
 
-    dockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    dockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable
+                            | QDockWidget::DockWidgetClosable);
     dockWidget->setWidget(leftBar);
     addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
 }

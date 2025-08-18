@@ -18,18 +18,23 @@ public:
     QRectF boundingRect() const override { return m_bounds; }
 
     QPainterPath shape() const override {
-        // 保守的 shape：把中心线以最大宽度外扩
+        // 针对 tablet 绘制的曲线，shape 设置为曲线+首尾相连的闭合路径
         if (m_pts.isEmpty()) return QPainterPath();
 
         QPainterPath path;
         path.moveTo(m_pts.first());
-        for (auto &pt : m_pts) path.lineTo(pt);
+        for (int i = 1; i < m_pts.size(); ++i) {
+            path.lineTo(m_pts[i]);
+        }
+        path.lineTo(m_pts.first());
+        path.closeSubpath();
 
         QPainterPathStroker stroker;
         stroker.setCapStyle(Qt::RoundCap);
         stroker.setJoinStyle(Qt::RoundJoin);
         stroker.setWidth(qMax<qreal>(1.0, m_basePen.widthF())); // 最大宽度≈basePen
-        return stroker.createStroke(path);
+        path.addPath(stroker.createStroke(path));
+        return path;
     }
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
@@ -123,8 +128,8 @@ private:
             miny = qMin(miny, p.y());
             maxy = qMax(maxy, p.y());
         }
-        // 最大可能宽度 ≈ base width（按上面的映射，最大是1.0*base）
-        qreal half = qMax<qreal>(1.0, m_basePen.widthF()) * 0.5 + 2.0; // +2 抗锯齿余量
+        // 最大可能宽度 ≈ base width（按上面的映射，最大是1.0*base），额外加 2 处理抗锯齿
+        qreal half = qMax<qreal>(1.0, m_basePen.widthF()) * 0.5 + 2.0;
         m_bounds = QRectF(QPointF(minx - half, miny - half), QPointF(maxx + half, maxy + half));
     }
 
@@ -202,7 +207,11 @@ void FreeHandTool::changeOpacityPressure(bool enabled) {
 }
 
 void FreeHandTool::onTabletEvent(QTabletEvent *event) {
-    const auto pos = view()->mapToScene(event->pos());
+    if (activeInput == InputSource::Mouse) {
+        event->accept();
+        return;
+    }
+    const auto pos = view()->mapToScene(event->position().toPoint());
 
     switch (event->type()) {
     case QEvent::TabletPress: {
@@ -231,12 +240,10 @@ void FreeHandTool::onTabletEvent(QTabletEvent *event) {
                 new VariableSegItem(segPoints, segPressures, pen(), widthPressure, opacityPressure);
             scene()->addItem(previewSegItem);
         }
-        event->accept();
         break;
     }
     case QEvent::TabletMove: {
         if (!isDrawing || !previewSegItem) {
-            event->accept();
             break;
         }
 
@@ -250,8 +257,6 @@ void FreeHandTool::onTabletEvent(QTabletEvent *event) {
                 previewSegItem->updateSeg(segPoints, segPressures);
             }
         }
-
-        event->accept();
         break;
     }
     case QEvent::TabletRelease: {
@@ -271,12 +276,9 @@ void FreeHandTool::onTabletEvent(QTabletEvent *event) {
             segPressures.clear();
             tempPath = QPainterPath();
         }
-
-        event->accept();
         break;
     }
-    default:
-        // 其它 tablet 事件忽略
-        break;
+    default: break;
     }
+    event->accept();
 }

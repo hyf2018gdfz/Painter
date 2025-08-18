@@ -80,6 +80,8 @@ void SelectTool::createPreviewItems() {
             preview = scene()->addRect(item->boundingRect());
             preview->setPos(item->scenePos());
             preview->setTransform(item->transform());
+            preview->setRotation(item->rotation());
+            // qDebug() << item << " " << item->transform();
         }
 
         preview->setOpacity(0.5);
