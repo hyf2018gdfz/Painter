@@ -19,9 +19,11 @@ qt_standard_project_setup()
 
 add_subdirectory(modules)
 
+qt_add_resources(RESOURCES resources.qrc)
+
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     if(WIN32)
-        add_executable(${PROJECT_NAME} WIN32 apps/main.cpp)
+        add_executable(${PROJECT_NAME} WIN32 apps/main.cpp ${RESOURCES})
     else()
         add_executable(${PROJECT_NAME} apps/main.cpp)
     endif()
