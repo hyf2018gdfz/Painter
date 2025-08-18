@@ -5,6 +5,10 @@
 #include "vision/canvasview.h"
 #include "vision/mainwindow.h"
 
+/// INFO:
+/// 目前的做法是段内进一步线性细分成多段，但是仍然无法根本上解决放大后看像香肠的问题。
+/// 另外，细分带来的性能问题也比较棘手。或许采取其它的细分方式会更好？真搞不明白商业软件怎么做到的
+
 class VariableSegItem : public QGraphicsItem {
 public:
     VariableSegItem(const QVector<QPointF> &pts, const QVector<qreal> &pressures,
@@ -41,6 +45,7 @@ public:
                QWidget *widget) override {
         Q_UNUSED(option);
         Q_UNUSED(widget);
+        painter->setRenderHint(QPainter::Antialiasing);
 
         if (m_pts.size() < 2) {
             // 单点点击，画一个小圆点
@@ -54,7 +59,6 @@ public:
             }
             p.setColor(c);
 
-            // 用较小宽度画一个点
             qreal w = p.widthF();
             if (m_widthPressure && !m_pressures.isEmpty()) {
                 w = segmentWidth(m_pressures.first(), w);
@@ -65,7 +69,6 @@ public:
             return;
         }
 
-        // 逐段绘制：每段设置自己的 pen（宽度/不透明度）
         QPen p = m_basePen;
         p.setCapStyle(Qt::RoundCap);
         p.setJoinStyle(Qt::RoundJoin);
@@ -74,21 +77,39 @@ public:
         const qreal baseAlpha = baseColor.alphaF();
 
         for (int i = 1; i < m_pts.size(); ++i) {
-            const qreal pr = m_pressures.value(i, 1.0); // 用当前点的压力
-            qreal segW = m_basePen.widthF();
-            if (m_widthPressure) {
-                segW = segmentWidth(pr, segW);
-            }
+            QPointF p0 = m_pts[i - 1];
+            QPointF p1 = m_pts[i];
+            qreal pr0 = m_pressures.value(i - 1, 1.0);
+            qreal pr1 = m_pressures.value(i, 1.0);
 
-            QColor c = baseColor;
-            if (m_opacityPressure) {
-                c.setAlphaF(segmentAlpha(pr, baseAlpha));
-            }
+            // 在段内插值
+            const int steps = 6;
+            for (int s = 0; s < steps; ++s) {
+                qreal t0 = qreal(s) / steps;
+                qreal t1 = qreal(s + 1) / steps;
 
-            p.setWidthF(qMax<qreal>(0.5, segW));
-            p.setColor(c);
-            painter->setPen(p);
-            painter->drawLine(m_pts[i - 1], m_pts[i]);
+                QPointF q0 = (1 - t0) * p0 + t0 * p1;
+                QPointF q1 = (1 - t1) * p0 + t1 * p1;
+                qreal prA = (1 - t0) * pr0 + t0 * pr1;
+                qreal prB = (1 - t1) * pr0 + t1 * pr1;
+
+                qreal wA = m_basePen.widthF();
+                qreal wB = m_basePen.widthF();
+                if (m_widthPressure) {
+                    wA = segmentWidth(prA, wA);
+                    wB = segmentWidth(prB, wB);
+                }
+
+                QColor c = baseColor;
+                if (m_opacityPressure) {
+                    c.setAlphaF(2 * segmentAlpha((prA + prB) / 2, baseAlpha) / steps);
+                }
+
+                p.setWidthF(qMax<qreal>(0.5, 0.5 * (wA + wB)));
+                p.setColor(c);
+                painter->setPen(p);
+                painter->drawLine(q0, q1);
+            }
         }
 
         if (isSelected()) {
@@ -109,10 +130,10 @@ public:
 private:
     static inline qreal clamp01(qreal x) { return x < 0 ? 0 : (x > 1 ? 1 : x); }
     static inline qreal segmentWidth(qreal pressure, qreal baseW) {
-        return baseW * (0.2 + 0.8 * clamp01(pressure));
+        return baseW * (0.15 + 0.85 * clamp01(pressure));
     }
     static inline qreal segmentAlpha(qreal pressure, qreal baseAlpha) {
-        return baseAlpha * (0.2 + 0.8 * clamp01(pressure));
+        return segmentWidth(pressure, baseAlpha);
     }
 
     void prepareGeometry() {
@@ -206,6 +227,7 @@ void FreeHandTool::changeOpacityPressure(bool enabled) {
     opacityPressure = enabled;
 }
 
+/// BUG: 在高速移动的时候，线条采样会呈现粗点、细线……的不均匀现象
 void FreeHandTool::onTabletEvent(QTabletEvent *event) {
     if (activeInput == InputSource::Mouse) {
         event->accept();
@@ -247,15 +269,12 @@ void FreeHandTool::onTabletEvent(QTabletEvent *event) {
             break;
         }
 
-        // 采样（可加距离阈值，降低采样密度）
+        /// INFO: 或许有更好的采样策略
         const qreal pr = qBound<qreal>(0.0, event->pressure(), 1.0);
-        // 距离阈值，减少过密采样（可调）
-        if (segPoints.isEmpty() || (segPoints.last() - pos).manhattanLength() >= 0.5) {
-            segPoints.push_back(pos);
-            segPressures.push_back(pr);
-            if (previewSegItem) {
-                previewSegItem->updateSeg(segPoints, segPressures);
-            }
+        segPoints.push_back(pos);
+        segPressures.push_back(pr);
+        if (previewSegItem) {
+            previewSegItem->updateSeg(segPoints, segPressures);
         }
         break;
     }
