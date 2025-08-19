@@ -18,13 +18,15 @@ void PolygonTool::onMousePress(QMouseEvent *event) {
         scene()->addItem(previewItem);
         updateDrawing(pos);
     } else {
-        points.push_back(pos);
         updateDrawing(pos);
 
         if (points.size() >= 3 && QLineF(pos, points.first()).length() <= 10.0) {
+            points.push_back(points.first());
             finishDrawing();
             cancelDrawing();
+            return;
         }
+        points.push_back(pos);
     }
 }
 
